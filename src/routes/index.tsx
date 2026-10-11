@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Bell, MapPin, ChevronDown, Search, Zap, Droplet, Wrench, Hammer, Smartphone, CarFront, ShieldCheck, ChevronRight, House, CalendarDays, MessageSquare, UserRound, Signal, Wifi, BatteryFull, X } from "lucide-react";
+import { Bell, MapPin, ChevronDown, Search, Zap, Droplet, Wrench, Hammer, Smartphone, CarFront, ShieldCheck, ChevronRight, House, CalendarDays, MessageSquare, UserRound, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import lake from "@/assets/kashmir-lake.jpg";
 
@@ -37,7 +37,6 @@ function Index() {
         <img className="landscape-photo" src={lake} alt="Snow-capped mountains and a forest-lined lake in Kashmir" width={1024} height={1024} />
         <div className="landscape-shade" />
         <div className="header-content">
-          <div className="status-bar" aria-hidden="true"><span>9:41</span><div><Signal /><Wifi /><BatteryFull /></div></div>
           <div className="location-row">
             <Button variant="ghost" className="location-button" onClick={() => setPanel("Location")}><MapPin fill="currentColor" /><span>{location}</span><ChevronDown /></Button>
             <Button variant="ghost" size="icon" className="notification-button" aria-label="Notifications" onClick={() => setPanel("Notifications")}><Bell /><span className="notification-dot" /></Button>
