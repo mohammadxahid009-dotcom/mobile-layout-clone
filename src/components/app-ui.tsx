@@ -1,5 +1,6 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, House, CalendarDays, MessageSquare, UserRound, Star, BadgeCheck } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import type { ReactNode } from "react";
 
 const tabs = [
@@ -9,12 +10,42 @@ const tabs = [
   { name: "Profile", to: "/profile", icon: UserRound },
 ] as const;
 
+// The nav remounts on every route change, so remember where the highlight last was
+// and glide it across instead of teleporting to the new tab.
+let lastIndex = 0;
+const useBeforePaintEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
 export function BottomNav({ active }: { active: (typeof tabs)[number]["name"] }) {
+  const index = Math.max(0, tabs.findIndex((tab) => tab.name === active));
+  const navRef = useRef<HTMLElement>(null);
+
+  useBeforePaintEffect(() => {
+    const from = lastIndex;
+    lastIndex = index;
+    if (from === index) return;
+    const pills = navRef.current?.querySelectorAll<HTMLElement>("[data-slide]") ?? [];
+    pills.forEach((pill) => {
+      pill.style.transition = "none";
+      pill.style.transform = `translateX(${from * 100}%)`;
+    });
+    const frame = requestAnimationFrame(() => {
+      pills.forEach((pill) => {
+        pill.style.transition = "";
+        pill.style.transform = `translateX(${index * 100}%)`;
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [index]);
+
+  const slide = { transform: `translateX(${index * 100}%)` };
+
   return (
-    <nav className="bottom-nav" aria-label="Main navigation">
+    <nav ref={navRef} className="bottom-nav" aria-label="Main navigation">
+      <span className="nav-capsule" data-slide style={slide} aria-hidden="true" />
+      <span className="nav-dot" data-slide style={slide} aria-hidden="true" />
       {tabs.map(({ name, to, icon: Icon }) => (
         <Link key={name} to={to} className={`nav-item ${name === active ? "nav-active" : ""}`} aria-current={name === active ? "page" : undefined}>
-          <Icon fill={name === active ? "currentColor" : "none"} /><span>{name}</span>{name === active && <i />}
+          <Icon fill={name === active ? "currentColor" : "none"} /><span>{name}</span>
         </Link>
       ))}
     </nav>
