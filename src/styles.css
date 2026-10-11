@@ -191,11 +191,22 @@ body::-webkit-scrollbar { width: 0; height: 0; display: none; }
 .verified-strip strong { font-size: 16px; line-height: 19px; color: var(--foreground); }
 .verified-strip small { font-size: 13px; line-height: 16px; color: var(--subtle-text); font-weight: 400; }
 .verified-strip .verified-arrow { width: 22px; height: 22px; margin-left: auto; color: var(--primary); stroke-width: 1.7; }
-.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: 72px; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); background: var(--background); border-top: 1px solid var(--search-surface); z-index: 5; padding: 8px 0 5px; }
-.nav-item { position: relative; display: flex; flex-direction: column; gap: 5px; height: 57px; padding: 1px 0 9px; color: var(--subtle-text); font-size: 13px; font-weight: 500; }
-.nav-item svg { width: 25px; height: 25px; stroke-width: 1.9; }
-.nav-active { color: var(--primary); }
-.nav-item i { position: absolute; bottom: 0; width: 16px; height: 3px; border-radius: 2px; background: var(--primary); }
+:root {
+  --nav-surface: linear-gradient(180deg, var(--card), color-mix(in oklab, var(--secondary) 30%, var(--card)));
+  --nav-border: color-mix(in oklab, var(--border) 65%, var(--card));
+  --nav-shadow: oklch(0.36 0.035 250 / 16%);
+  --nav-inactive: oklch(0.59 0.028 250);
+  --nav-capsule: color-mix(in oklab, var(--booking-green) 9%, var(--card));
+  --nav-icon-shadow: color-mix(in oklab, var(--booking-green) 25%, transparent);
+}
+.dark { --nav-shadow: oklch(0.08 0.01 250 / 45%); --nav-inactive: oklch(0.72 0.025 250); }
+.bottom-nav { position: fixed; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); width: calc(100% - 20px); max-width: 460px; height: 78px; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); align-items: center; background: var(--nav-surface); border: 1px solid var(--nav-border); border-radius: 28px; box-shadow: 0 12px 26px -6px var(--nav-shadow), 0 3px 8px -3px var(--booking-shadow); z-index: 5; padding: 7px 8px; }
+.nav-item { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; justify-self: center; gap: 5px; width: 100%; max-width: 76px; height: 62px; padding: 5px 0 10px; color: var(--nav-inactive); font-size: 12px; line-height: 16px; font-weight: 500; border-radius: 21px; }
+.nav-item svg { width: 25px; height: 25px; flex-shrink: 0; stroke-width: 1.9; }
+.nav-active { color: var(--booking-green); background: linear-gradient(180deg, var(--nav-capsule), var(--booking-mint)); box-shadow: 0 3px 7px -5px var(--nav-icon-shadow); }
+.nav-active svg { filter: drop-shadow(0 2px 2px var(--nav-icon-shadow)); }
+.nav-item i { position: absolute; bottom: 2px; width: 20px; height: 3px; border-radius: 3px; background: var(--booking-green); }
+.nav-item:focus-visible { outline: 2px solid var(--booking-green); outline-offset: 2px; }
 .no-results { font-size: 14px; color: var(--muted-foreground); padding: 25px 0; }
 .panel-backdrop { position: fixed; inset: 0; z-index: 20; background: var(--overlay); display: flex; justify-content: center; align-items: flex-end; }
 .detail-panel { width: 100%; max-width: 480px; background: var(--background); padding: 22px 22px 35px; border-radius: 18px 18px 0 0; }
@@ -455,7 +466,6 @@ textarea.input { resize: none; line-height: 1.5; }
 .verified-strip { border-radius: 14px; border: 1px solid color-mix(in oklch, var(--verified-icon) 18%, var(--verified-surface)); background: linear-gradient(110deg, oklch(0.975 0.015 175), var(--verified-surface) 60%, oklch(0.955 0.025 195)); box-shadow: 0 8px 20px -12px var(--elev-shadow-strong), 0 1px 3px var(--elev-shadow); }
 .verified-strip:hover { background: linear-gradient(110deg, oklch(0.975 0.015 175), var(--verified-surface) 60%, oklch(0.955 0.025 195)); }
 .verified-strip .verified-shield { filter: drop-shadow(0 3px 4px color-mix(in oklch, var(--verified-icon) 45%, transparent)); }
-.bottom-nav { border-top: 0; border-radius: 18px 18px 0 0; box-shadow: 0 -6px 22px -6px var(--elev-shadow-strong), 0 -1px 0 oklch(0.94 0.01 250); }
 .home-content { padding-bottom: 96px; }
 
 /* My Bookings: surfaces and proportions from the mobile reference. */
@@ -501,17 +511,13 @@ textarea.input { resize: none; line-height: 1.5; }
 .bookings-page .booking-card .outline-btn { color: var(--booking-green); border-color: var(--booking-green); background: linear-gradient(180deg, var(--card), var(--booking-mint)); }
 .bookings-page .booking-card .danger-btn { color: var(--booking-red); border-color: var(--booking-red); background: linear-gradient(180deg, var(--card), var(--booking-rose)); }
 .bookings-page .booking-card .btn-sm:active { filter: brightness(.97); }
-.bookings-page .bottom-nav { height: 83px; padding: 9px 0 8px; background: var(--card); border-radius: 19px 19px 0 0; border-top: 1px solid var(--soft-line); box-shadow: 0 -6px 20px -6px var(--booking-shadow); }
-.bookings-page .nav-item { height: 65px; gap: 6px; font-size: 13px; }
-.bookings-page .nav-active { color: var(--booking-green); background: linear-gradient(180deg, var(--booking-mint), var(--card)); border-radius: 14px; margin: 0 5px; }
-.bookings-page .nav-item i { width: 18px; height: 3px; background: var(--booking-green); }
-.bookings-page .nav-item svg { width: 26px; height: 26px; }
 .bookings-page .nav-active svg path, .bookings-page .nav-active svg line { stroke: var(--card); }
 .bookings-page .pill:focus-visible, .bookings-page .btn-sm:focus-visible { outline: 2px solid var(--booking-green); outline-offset: 3px; }
 
 /* Edge-to-edge phone surfaces; keep controls clear of device cutouts. */
 html, body { min-height: 100%; }
 .mobile-app { min-height: 100dvh; }
+.mobile-app:has(.bottom-nav) { padding-bottom: calc(122px + env(safe-area-inset-bottom, 0px)); }
 .chat-app { height: 100dvh; }
 @media (max-width: 480px) {
   .mobile-app { padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)); }
@@ -525,8 +531,6 @@ html, body { min-height: 100%; }
   .profile-head { padding-top: calc(30px + env(safe-area-inset-top, 0px)); }
   .chat-head { padding-top: calc(16px + env(safe-area-inset-top, 0px)); }
   .floating { top: calc(18px + env(safe-area-inset-top, 0px)); }
-  .bottom-nav { height: calc(72px + env(safe-area-inset-bottom, 0px)); padding-bottom: calc(5px + env(safe-area-inset-bottom, 0px)); }
-  .bookings-page .bottom-nav { height: calc(83px + env(safe-area-inset-bottom, 0px)); padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
   .sticky-cta { padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
   .composer { padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
   .detail-panel { padding-bottom: calc(35px + env(safe-area-inset-bottom, 0px)); }
