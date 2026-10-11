@@ -652,3 +652,8 @@ html, body { min-height: 100%; }
 .logout-btn svg { width: 20px; height: 20px; }
 .logout-btn:active { filter: brightness(.97); }
 .mobile-app.profile-page { padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px)); }
+
+/* Keep the profile card clear of a teardrop camera / status bar on phones. */
+@media (max-width: 480px) {
+  .profile-head { margin-top: calc(36px + env(safe-area-inset-top, 0px)); }
+}
