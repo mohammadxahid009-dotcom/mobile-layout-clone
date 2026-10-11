@@ -466,7 +466,8 @@ textarea.input { resize: none; line-height: 1.5; }
 .verified-strip { border-radius: 14px; border: 1px solid color-mix(in oklch, var(--verified-icon) 18%, var(--verified-surface)); background: linear-gradient(110deg, oklch(0.975 0.015 175), var(--verified-surface) 60%, oklch(0.955 0.025 195)); box-shadow: 0 8px 20px -12px var(--elev-shadow-strong), 0 1px 3px var(--elev-shadow); }
 .verified-strip:hover { background: linear-gradient(110deg, oklch(0.975 0.015 175), var(--verified-surface) 60%, oklch(0.955 0.025 195)); }
 .verified-strip .verified-shield { filter: drop-shadow(0 3px 4px color-mix(in oklch, var(--verified-icon) 45%, transparent)); }
-.home-content { padding-bottom: 96px; }
+/* The app shell already reserves space for the floating navbar. */
+.home-content { padding-bottom: 0; }
 
 /* My Bookings: surfaces and proportions from the mobile reference. */
 :root {
