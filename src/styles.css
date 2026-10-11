@@ -651,3 +651,4 @@ html, body { min-height: 100%; }
 }
 .logout-btn svg { width: 20px; height: 20px; }
 .logout-btn:active { filter: brightness(.97); }
+.mobile-app.profile-page { padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px)); }

@@ -58,7 +58,7 @@ function ProfilePage() {
   };
 
   return (
-    <div className="mobile-app plain">
+    <div className="mobile-app plain profile-page">
       <header className="profile-head">
         <div className="avatar-wrap">
           <img src={userPhoto} alt={user.name} className="avatar-xl" width={816} height={816} />
