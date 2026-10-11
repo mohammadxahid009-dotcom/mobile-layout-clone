@@ -11,3 +11,4 @@
 
 - Keep the mobile service home at `/`, with its presentation in global semantic CSS and local transient interaction state; this preserves the reference layout without implying connected booking services.
 - Declare phone edge-to-edge support in the root head and a web app manifest, with safe-area spacing in global CSS; this lets supported home-screen launches expand without placing controls under device cutouts.
+- Declare a screen's cutout clearance in a media query written after that screen's own style block, since a later equal-specificity rule wins; this keeps top content clear of phone notches and cameras.
