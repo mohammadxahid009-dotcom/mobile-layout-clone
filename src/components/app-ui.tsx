@@ -13,6 +13,7 @@ const tabs = [
 // The nav remounts on every route change, so remember where the highlight last was
 // and glide it across instead of teleporting to the new tab.
 let lastIndex = 0;
+let mountedOnce = false;
 const useBeforePaintEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export function BottomNav({ active }: { active: (typeof tabs)[number]["name"] }) {
@@ -21,8 +22,10 @@ export function BottomNav({ active }: { active: (typeof tabs)[number]["name"] })
 
   useBeforePaintEffect(() => {
     const from = lastIndex;
+    const firstMount = !mountedOnce;
+    mountedOnce = true;
     lastIndex = index;
-    if (from === index) return;
+    if (firstMount || from === index) return;
     const pills = navRef.current?.querySelectorAll<HTMLElement>("[data-slide]") ?? [];
     pills.forEach((pill) => {
       pill.style.transition = "none";
