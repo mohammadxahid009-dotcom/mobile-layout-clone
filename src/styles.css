@@ -533,7 +533,7 @@ html, body { min-height: 100%; }
   .page-head { padding-top: calc(26px + env(safe-area-inset-top, 0px)); }
   .bookings-page .page-head { padding-top: calc(36px + env(safe-area-inset-top, 0px)); }
   .top-bar { padding-top: calc(22px + env(safe-area-inset-top, 0px)); }
-  .profile-head { padding-top: calc(30px + env(safe-area-inset-top, 0px)); }
+  .profile-head { margin-top: calc(14px + env(safe-area-inset-top, 0px)); }
   .chat-head { padding-top: calc(16px + env(safe-area-inset-top, 0px)); }
   .floating { top: calc(18px + env(safe-area-inset-top, 0px)); }
   .sticky-cta { padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
@@ -543,3 +543,112 @@ html, body { min-height: 100%; }
 @media (min-width: 430px) and (max-width: 480px) {
   .landscape-header { height: calc(355px + env(safe-area-inset-top, 0px)); }
 }
+
+/* Profile screen: premium card surfaces from the mobile reference. */
+:root {
+  --profile-shadow: oklch(0.36 0.035 250 / 10%);
+  --profile-card: linear-gradient(115deg, oklch(0.972 0.022 163), oklch(0.955 0.03 172) 60%, oklch(0.938 0.035 178));
+  --profile-border: color-mix(in oklch, var(--booking-green) 15%, oklch(0.95 0.01 163));
+  --menu-icon-green: oklch(0.965 0.03 150);
+  --menu-ink-green: oklch(0.5 0.13 150);
+  --menu-icon-amber: oklch(0.968 0.04 85);
+  --menu-ink-amber: oklch(0.72 0.14 80);
+  --menu-icon-pink: oklch(0.965 0.025 15);
+  --menu-ink-pink: oklch(0.62 0.19 15);
+  --menu-icon-blue: oklch(0.962 0.022 250);
+  --menu-ink-blue: oklch(0.56 0.15 255);
+  --menu-icon-purple: oklch(0.96 0.028 305);
+  --menu-ink-purple: oklch(0.58 0.17 305);
+  --menu-icon-mint: oklch(0.962 0.032 165);
+  --menu-ink-mint: oklch(0.54 0.11 165);
+}
+.dark {
+  --profile-shadow: oklch(0.08 0.01 250 / 35%);
+  --profile-card: linear-gradient(115deg, oklch(0.26 0.022 163), oklch(0.23 0.03 172) 60%, oklch(0.21 0.035 178));
+  --profile-border: color-mix(in oklch, var(--booking-green) 28%, oklch(0.25 0.02 165));
+  --menu-icon-green: oklch(0.3 0.03 150);
+  --menu-ink-green: oklch(0.8 0.12 150);
+  --menu-icon-amber: oklch(0.3 0.04 85);
+  --menu-ink-amber: oklch(0.83 0.13 80);
+  --menu-icon-pink: oklch(0.3 0.03 15);
+  --menu-ink-pink: oklch(0.76 0.16 15);
+  --menu-icon-blue: oklch(0.3 0.03 250);
+  --menu-ink-blue: oklch(0.76 0.12 255);
+  --menu-icon-purple: oklch(0.3 0.04 305);
+  --menu-ink-purple: oklch(0.76 0.14 305);
+  --menu-icon-mint: oklch(0.3 0.032 165);
+  --menu-ink-mint: oklch(0.79 0.1 165);
+}
+.profile-head {
+  display: flex; align-items: center; gap: 16px;
+  margin: 16px 16px 20px; padding: 18px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--profile-border);
+  background: var(--profile-card);
+  box-shadow: 0 10px 22px -12px var(--profile-shadow), 0 1px 3px var(--profile-shadow);
+}
+.profile-head > div { flex: 1; min-width: 0; }
+.profile-head h1 { font-size: 20px; font-weight: 750; margin: 0 0 5px; }
+.profile-head .muted { font-size: 14px; }
+.avatar-wrap { position: relative; flex-shrink: 0; }
+.profile-head .avatar-xl { display: block; width: 76px; height: 76px; border: 3px solid var(--card); box-shadow: 0 5px 12px -5px var(--profile-shadow); }
+.edit-badge {
+  position: absolute; right: -2px; bottom: -2px;
+  display: flex; align-items: center; justify-content: center;
+  width: 27px; height: 27px; border-radius: 50%;
+  border: 2px solid var(--card);
+  background: var(--booking-green); color: var(--booking-on-green);
+  cursor: pointer; padding: 0;
+}
+.edit-badge svg { width: 13px; height: 13px; }
+.profile-head .icon-btn {
+  width: 42px; height: 42px; border-radius: 13px;
+  background: var(--card); border: 1px solid var(--soft-line);
+  box-shadow: 0 4px 9px -4px var(--profile-shadow);
+  color: var(--foreground); flex-shrink: 0;
+}
+.profile-head .icon-btn svg { width: 21px; height: 21px; }
+.menu {
+  margin: 0 16px; padding: 3px 10px;
+  border-radius: 16px;
+  border: 1px solid var(--soft-line);
+  background: var(--card);
+  box-shadow: 0 8px 20px -10px var(--profile-shadow), 0 1px 3px var(--profile-shadow);
+}
+.menu-row {
+  width: 100%; display: flex; align-items: center; gap: 14px;
+  padding: 13px 8px;
+  border: 0; border-bottom: 1px solid var(--soft-line);
+  border-radius: 10px;
+  background: transparent;
+  font: inherit; font-size: 15px; font-weight: 600; color: var(--foreground);
+  cursor: pointer; text-align: left;
+  transition: background 150ms ease;
+}
+.menu-row:active, .menu-row:hover { background: color-mix(in oklab, var(--muted) 45%, var(--card)); }
+.menu-row:last-of-type, .menu-row:nth-last-child(2) { border-bottom: 0; }
+.menu-row svg { width: 21px; height: 21px; stroke-width: 1.9; }
+.menu-row > .menu-icon { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; }
+.menu-row > .menu-icon svg { width: 21px; height: 21px; }
+.menu-row > .menu-icon.tint-green { background: var(--menu-icon-green); color: var(--menu-ink-green); }
+.menu-row > .menu-icon.tint-amber { background: var(--menu-icon-amber); color: var(--menu-ink-amber); }
+.menu-row > .menu-icon.tint-pink { background: var(--menu-icon-pink); color: var(--menu-ink-pink); }
+.menu-row > .menu-icon.tint-blue { background: var(--menu-icon-blue); color: var(--menu-ink-blue); }
+.menu-row > .menu-icon.tint-purple { background: var(--menu-icon-purple); color: var(--menu-ink-purple); }
+.menu-row > .menu-icon.tint-mint { background: var(--menu-icon-mint); color: var(--menu-ink-mint); }
+.menu-row span { flex: 1; }
+.menu-row .chev { flex: 0 0 auto; width: 18px; color: var(--subtle-text); }
+.logout-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: calc(100% - 32px); height: 52px; margin: 22px 16px 0;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklch, var(--destructive) 30%, transparent);
+  background: linear-gradient(180deg, var(--card), var(--booking-rose));
+  color: var(--destructive);
+  font: inherit; font-size: 15.5px; font-weight: 600;
+  box-shadow: 0 5px 12px -7px var(--profile-shadow);
+  cursor: pointer;
+}
+.logout-btn svg { width: 20px; height: 20px; }
+.logout-btn:active { filter: brightness(.97); }
+.mobile-app.profile-page { padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px)); }
