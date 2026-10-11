@@ -128,6 +128,16 @@
 }
 
 body { margin: 0; font-family: Arial, Helvetica, sans-serif; letter-spacing: 0; background: var(--app-surround); }
+
+/* Hide scroll indicators everywhere while keeping scrolling working. */
+html { scrollbar-width: none; -ms-overflow-style: none; }
+html::-webkit-scrollbar,
+body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+*,
+*::before,
+*::after { scrollbar-width: none; -ms-overflow-style: none; }
+*::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
 .mobile-app { position: relative; max-width: 480px; margin: 0 auto; min-height: 100svh; background: var(--background); padding-bottom: 78px; }
 .landscape-header { position: relative; height: 332px; overflow: hidden; border-radius: 0 0 24px 24px; color: var(--hero-foreground); }
 .landscape-photo,.landscape-shade { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
