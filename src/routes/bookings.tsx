@@ -30,7 +30,7 @@ function BookingsPage() {
   const display = showAll ? [...list, ...bookings.filter(b => b.status === "Completed").slice(0, 1)] : list;
 
   return (
-    <div className="mobile-app plain">
+    <div className="mobile-app plain bookings-page">
       <header className="page-head"><h1>My Bookings</h1></header>
       <div className="pill-row">{tabs.map(t => <button key={t} className={`pill ${tab === t ? "pill-active" : ""}`} onClick={() => setTab(t)}>{t}</button>)}</div>
       <main className="list-content">
