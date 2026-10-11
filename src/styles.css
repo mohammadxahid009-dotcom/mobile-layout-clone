@@ -658,3 +658,14 @@ html, body { min-height: 100%; }
 @media (max-width: 480px) {
   .profile-head { margin-top: calc(36px + env(safe-area-inset-top, 0px)); }
 }
+
+/* Fixed scale: no double-tap zoom, no pinch-to-zoom. */
+html {
+  touch-action: manipulation;
+}
+body {
+  touch-action: manipulation;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
