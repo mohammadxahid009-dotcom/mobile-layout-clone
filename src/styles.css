@@ -328,7 +328,7 @@ textarea.input { resize: none; line-height: 1.5; }
 .select-wrap > svg:first-child:not(.chev) { position: absolute; left: 14px; width: 19px; height: 19px; color: var(--foreground); pointer-events: none; }
 .select-wrap .chev { position: absolute; right: 12px; width: 18px; height: 18px; color: var(--foreground); pointer-events: none; }
 /* bookings */
-.booking-card { border: 1px solid var(--soft-line); border-radius: 12px; padding: 16px 12px 14px; box-shadow: 0 2px 8px oklch(0.2 0.02 250 / 4%); }
+.booking-card { border: 1px solid var(--soft-line); border-radius: 12px; padding: 16px 12px 14px; box-shadow: 0 2px 8px var(--booking-shadow); }
 .booking-top { display: flex; gap: 14px; }
 .booking-info h2 { font-size: 15px; font-weight: 700; margin: 3px 0 6px; }
 .muted { color: var(--subtle-text); font-size: 13.5px; margin: 0; }
@@ -457,3 +457,54 @@ textarea.input { resize: none; line-height: 1.5; }
 .verified-strip .verified-shield { filter: drop-shadow(0 3px 4px color-mix(in oklch, var(--verified-icon) 45%, transparent)); }
 .bottom-nav { border-top: 0; border-radius: 18px 18px 0 0; box-shadow: 0 -6px 22px -6px var(--elev-shadow-strong), 0 -1px 0 oklch(0.94 0.01 250); }
 .home-content { padding-bottom: 96px; }
+
+/* My Bookings: surfaces and proportions from the mobile reference. */
+:root {
+  --booking-green: oklch(0.49 0.115 163);
+  --booking-green-highlight: oklch(0.63 0.125 165);
+  --booking-on-green: oklch(1 0 0);
+  --booking-red: oklch(0.56 0.2 20);
+  --booking-shadow: oklch(0.36 0.035 250 / 8%);
+  --booking-tab-surface: color-mix(in oklch, var(--muted) 75%, var(--background));
+  --booking-mint: color-mix(in oklch, var(--booking-green) 7%, var(--card));
+  --booking-rose: color-mix(in oklch, var(--booking-red) 6%, var(--card));
+  --booking-card-gradient: linear-gradient(160deg, var(--card), color-mix(in oklch, var(--secondary) 32%, var(--card)));
+  --booking-active-gradient: linear-gradient(135deg, var(--booking-green-highlight), var(--booking-green) 75%);
+}
+.dark {
+  --booking-green: oklch(0.75 0.13 163);
+  --booking-green-highlight: oklch(0.65 0.12 165);
+  --booking-on-green: oklch(0.18 0.03 163);
+  --booking-red: oklch(0.75 0.15 20);
+  --booking-shadow: oklch(0.08 0.01 250 / 30%);
+}
+.bookings-page .page-head { padding: 36px 16px 8px; }
+.bookings-page .page-head h1 { font-size: 26px; line-height: 32px; font-weight: 750; }
+.bookings-page > .pill-row { display: grid; grid-template-columns: 1.03fr 1fr 1fr; gap: 10px; padding: 8px 16px 17px; overflow: visible; }
+.bookings-page > .pill-row .pill { width: 100%; min-width: 0; height: 38px; padding: 0 6px; font-size: 14px; background: linear-gradient(180deg, var(--background), var(--booking-tab-surface)); box-shadow: 0 5px 12px -6px var(--booking-shadow); }
+.bookings-page > .pill-row .pill-active { background: var(--booking-active-gradient); color: var(--booking-on-green); box-shadow: 0 6px 14px -5px color-mix(in oklch, var(--booking-green) 28%, transparent); }
+.bookings-page .list-content { padding: 0 15px; gap: 18px; }
+.bookings-page .booking-card { padding: 14px 13px; border: 1px solid var(--soft-line); border-radius: 13px; background: var(--booking-card-gradient); box-shadow: 0 8px 18px -8px var(--booking-shadow), 0 1px 3px var(--booking-shadow); }
+.bookings-page .booking-top { gap: 14px; }
+.bookings-page .avatar-md { width: 56px; height: 56px; outline: 1px solid var(--soft-line); box-shadow: 0 3px 8px -4px var(--booking-shadow); }
+.bookings-page .booking-info { flex: 1; min-width: 0; }
+.bookings-page .booking-info h2 { font-size: 16px; line-height: 21px; font-weight: 750; margin: 3px 0 6px; overflow-wrap: anywhere; }
+.bookings-page .booking-info .muted { font-size: 14px; line-height: 19px; }
+.bookings-page .meta.sm { font-size: 12.5px; line-height: 19px; margin-top: 5px; gap: 7px; color: var(--secondary-foreground); align-items: flex-start; }
+.bookings-page .meta.sm svg { width: 15px; height: 18px; }
+.bookings-page .status-row { margin-top: 6px; }
+.bookings-page .status { font-size: 12px; line-height: 18px; padding: 3px 10px; border-radius: 8px; }
+.bookings-page .status-completed { background: color-mix(in oklch, var(--booking-green) 13%, var(--card)); color: var(--booking-green); }
+.bookings-page .booking-card .btn-pair { gap: 11px; }
+.bookings-page .booking-card .btn-pair, .bookings-page .booking-card .full { margin-top: 14px; }
+.bookings-page .booking-card .btn-sm { height: 40px; font-size: 14px; font-weight: 500; border-width: 1px; border-radius: 10px; padding: 0 10px; box-shadow: 0 2px 4px var(--booking-shadow); }
+.bookings-page .booking-card .outline-btn { color: var(--booking-green); border-color: var(--booking-green); background: linear-gradient(180deg, var(--card), var(--booking-mint)); }
+.bookings-page .booking-card .danger-btn { color: var(--booking-red); border-color: var(--booking-red); background: linear-gradient(180deg, var(--card), var(--booking-rose)); }
+.bookings-page .booking-card .btn-sm:active { filter: brightness(.97); }
+.bookings-page .bottom-nav { height: 83px; padding: 9px 0 8px; background: var(--card); border-radius: 19px 19px 0 0; border-top: 1px solid var(--soft-line); box-shadow: 0 -6px 20px -6px var(--booking-shadow); }
+.bookings-page .nav-item { height: 65px; gap: 6px; font-size: 13px; }
+.bookings-page .nav-active { color: var(--booking-green); background: linear-gradient(180deg, var(--booking-mint), var(--card)); border-radius: 14px; margin: 0 5px; }
+.bookings-page .nav-item i { width: 18px; height: 3px; background: var(--booking-green); }
+.bookings-page .nav-item svg { width: 26px; height: 26px; }
+.bookings-page .nav-active svg path, .bookings-page .nav-active svg line { stroke: var(--card); }
+.bookings-page .pill:focus-visible, .bookings-page .btn-sm:focus-visible { outline: 2px solid var(--booking-green); outline-offset: 3px; }
