@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Keep the mobile service home at `/`, with its presentation in global semantic CSS and local transient interaction state; this preserves the reference layout without implying connected booking services.
+- Declare phone edge-to-edge support in the root head and a web app manifest, with safe-area spacing in global CSS; this lets supported home-screen launches expand without placing controls under device cutouts.
