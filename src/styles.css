@@ -443,3 +443,17 @@ textarea.input { resize: none; line-height: 1.5; }
     color: var(--color-foreground);
   }
 }
+
+/* Polished premium home surfaces */
+:root { --elev-shadow: oklch(0.35 0.03 250 / 0.10); --elev-shadow-strong: oklch(0.35 0.03 250 / 0.16); }
+.search-field { background: var(--background); border: 1px solid oklch(0.92 0.01 250); box-shadow: 0 10px 24px -8px var(--elev-shadow-strong), 0 2px 6px var(--elev-shadow); }
+.service-tile { border-radius: 14px; border: 1.5px solid color-mix(in oklch, var(--tile-ink) 26%, var(--tile-surface)); background: linear-gradient(180deg, color-mix(in oklch, var(--tile-surface) 70%, var(--background)), var(--tile-surface)); box-shadow: 0 8px 18px -10px color-mix(in oklch, var(--tile-ink) 35%, transparent), 0 2px 4px var(--elev-shadow); }
+.service-tile:hover { background: linear-gradient(180deg, var(--tile-surface), var(--tile-circle)); }
+.service-tile:active { transform: scale(.97); }
+.service-icon { background: radial-gradient(circle at 35% 28%, var(--background) 0%, var(--tile-circle) 55%, color-mix(in oklch, var(--tile-circle) 80%, var(--tile-ink)) 100%); border: 1px solid color-mix(in oklch, var(--tile-ink) 18%, var(--tile-circle)); box-shadow: inset 0 2px 3px oklch(1 0 0 / .8), inset 0 -3px 6px color-mix(in oklch, var(--tile-ink) 14%, transparent), 0 5px 10px -4px color-mix(in oklch, var(--tile-ink) 40%, transparent); }
+.service-icon svg { filter: drop-shadow(0 2px 2px color-mix(in oklch, var(--tile-ink) 35%, transparent)); }
+.verified-strip { border-radius: 14px; border: 1px solid color-mix(in oklch, var(--verified-icon) 18%, var(--verified-surface)); background: linear-gradient(110deg, oklch(0.975 0.015 175), var(--verified-surface) 60%, oklch(0.955 0.025 195)); box-shadow: 0 8px 20px -12px var(--elev-shadow-strong), 0 1px 3px var(--elev-shadow); }
+.verified-strip:hover { background: linear-gradient(110deg, oklch(0.975 0.015 175), var(--verified-surface) 60%, oklch(0.955 0.025 195)); }
+.verified-strip .verified-shield { filter: drop-shadow(0 3px 4px color-mix(in oklch, var(--verified-icon) 45%, transparent)); }
+.bottom-nav { border-top: 0; border-radius: 18px 18px 0 0; box-shadow: 0 -6px 22px -6px var(--elev-shadow-strong), 0 -1px 0 oklch(0.94 0.01 250); }
+.home-content { padding-bottom: 96px; }
