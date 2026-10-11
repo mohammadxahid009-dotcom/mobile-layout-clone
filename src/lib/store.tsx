@@ -1,0 +1,61 @@
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+
+export type Booking = { id: string; providerId: string; service: string; date: string; time: string; location: string; description: string; status: "Pending" | "Completed" | "Cancelled" };
+export type Message = { id: string; from: "me" | "them"; text: string; time: string };
+type State = { bookings: Booking[]; chats: Record<string, Message[]>; saved: string[]; user: { name: string; email: string }; loggedIn: boolean };
+
+const initial: State = {
+  bookings: [
+    { id: "b1", providerId: "sameer-electricals", service: "House Wiring", date: "Tomorrow, 10 Apr", time: "10:00 AM - 12:00 PM", location: "Chadoora, Budgam", description: "Need to fix wiring for kitchen and install one ceiling light.", status: "Pending" },
+    { id: "b2", providerId: "bilal-electric-works", service: "AC Repair", date: "8 Apr 2025", time: "2:00 PM - 4:00 PM", location: "Budgam", description: "", status: "Completed" },
+  ],
+  chats: {
+    "sameer-electricals": [
+      { id: "m1", from: "me", text: "Hi, I have a small issue with my kitchen wiring. Can you confirm you'll be available tomorrow morning?", time: "10:12 AM" },
+      { id: "m2", from: "them", text: "Yes, I can come tomorrow at 10 AM. Please share your exact location.", time: "10:16 AM" },
+      { id: "m3", from: "me", text: "It's in Chadoora, near the mosque. I'll share the pin.", time: "10:17 AM" },
+    ],
+  },
+  saved: ["aamir-khan"],
+  user: { name: "Arif Hussain", email: "arif@gmail.com" },
+  loggedIn: true,
+};
+
+type Ctx = State & {
+  addBooking: (b: Omit<Booking, "id" | "status">) => void;
+  setStatus: (id: string, status: Booking["status"]) => void;
+  send: (providerId: string, text: string) => void;
+  toggleSaved: (id: string) => void;
+  setUser: (u: State["user"]) => void;
+  setLoggedIn: (v: boolean) => void;
+};
+const StoreContext = createContext<Ctx | null>(null);
+const KEY = "budgam-services-v1";
+const now = () => new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+
+export function StoreProvider({ children }: { children: ReactNode }) {
+  const [state, setState] = useState<State>(initial);
+  const [ready, setReady] = useState(false);
+  useEffect(() => { try { const raw = localStorage.getItem(KEY); if (raw) setState({ ...initial, ...JSON.parse(raw) }); } catch { /* ignore */ } setReady(true); }, []);
+  useEffect(() => { if (ready) localStorage.setItem(KEY, JSON.stringify(state)); }, [state, ready]);
+
+  const value: Ctx = {
+    ...state,
+    addBooking: b => setState(s => ({ ...s, bookings: [{ ...b, id: crypto.randomUUID(), status: "Pending" }, ...s.bookings] })),
+    setStatus: (id, status) => setState(s => ({ ...s, bookings: s.bookings.map(b => b.id === id ? { ...b, status } : b) })),
+    send: (providerId, text) => {
+      setState(s => ({ ...s, chats: { ...s.chats, [providerId]: [...(s.chats[providerId] ?? []), { id: crypto.randomUUID(), from: "me", text, time: now() }] } }));
+      setTimeout(() => setState(s => ({ ...s, chats: { ...s.chats, [providerId]: [...(s.chats[providerId] ?? []), { id: crypto.randomUUID(), from: "them", text: "Thanks for your message! I'll get back to you shortly.", time: now() }] } })), 1500);
+    },
+    toggleSaved: id => setState(s => ({ ...s, saved: s.saved.includes(id) ? s.saved.filter(x => x !== id) : [...s.saved, id] })),
+    setUser: user => setState(s => ({ ...s, user })),
+    setLoggedIn: loggedIn => setState(s => ({ ...s, loggedIn })),
+  };
+  return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
+}
+
+export function useStore() {
+  const ctx = useContext(StoreContext);
+  if (!ctx) throw new Error("useStore must be inside StoreProvider");
+  return ctx;
+}
