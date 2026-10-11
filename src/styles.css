@@ -533,7 +533,7 @@ html, body { min-height: 100%; }
   .page-head { padding-top: calc(26px + env(safe-area-inset-top, 0px)); }
   .bookings-page .page-head { padding-top: calc(36px + env(safe-area-inset-top, 0px)); }
   .top-bar { padding-top: calc(22px + env(safe-area-inset-top, 0px)); }
-  .profile-head { padding-top: calc(30px + env(safe-area-inset-top, 0px)); }
+  .profile-head { margin-top: calc(14px + env(safe-area-inset-top, 0px)); }
   .chat-head { padding-top: calc(16px + env(safe-area-inset-top, 0px)); }
   .floating { top: calc(18px + env(safe-area-inset-top, 0px)); }
   .sticky-cta { padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }

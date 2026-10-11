@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { Settings, ClipboardList, Star, Heart, CircleHelp, Info, ShieldCheck, FileText, ChevronRight, X } from "lucide-react";
+import { Settings, ClipboardList, Star, Heart, CircleHelp, Info, ShieldCheck, FileText, ChevronRight, X, SquarePen, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { BottomNav, Rating } from "@/components/app-ui";
 import { getProvider, userPhoto } from "@/lib/data";
@@ -33,14 +33,14 @@ function ProfilePage() {
     </div>
   );
 
-  const items: { label: string; icon: typeof Star; action: () => void }[] = [
-    { label: "My Bookings", icon: ClipboardList, action: () => navigate({ to: "/bookings" }) },
-    { label: "My Reviews", icon: Star, action: () => setPanel("reviews") },
-    { label: "Saved Providers", icon: Heart, action: () => setPanel("saved") },
-    { label: "Help & Support", icon: CircleHelp, action: () => setPanel("help") },
-    { label: "About Us", icon: Info, action: () => setPanel("about") },
-    { label: "Privacy Policy", icon: ShieldCheck, action: () => setPanel("privacy") },
-    { label: "Terms & Conditions", icon: FileText, action: () => setPanel("terms") },
+  const items: { label: string; icon: typeof Star; tint: string; action: () => void }[] = [
+    { label: "My Bookings", icon: ClipboardList, tint: "tint-green", action: () => navigate({ to: "/bookings" }) },
+    { label: "My Reviews", icon: Star, tint: "tint-amber", action: () => setPanel("reviews") },
+    { label: "Saved Providers", icon: Heart, tint: "tint-pink", action: () => setPanel("saved") },
+    { label: "Help & Support", icon: CircleHelp, tint: "tint-blue", action: () => setPanel("help") },
+    { label: "About Us", icon: Info, tint: "tint-purple", action: () => setPanel("about") },
+    { label: "Privacy Policy", icon: ShieldCheck, tint: "tint-mint", action: () => setPanel("privacy") },
+    { label: "Terms & Conditions", icon: FileText, tint: "tint-blue", action: () => setPanel("terms") },
   ];
 
   const sheets: Record<Exclude<Panel, null>, { title: string; body: ReactNode }> = {
@@ -60,13 +60,18 @@ function ProfilePage() {
   return (
     <div className="mobile-app plain">
       <header className="profile-head">
-        <img src={userPhoto} alt={user.name} className="avatar-xl" width={816} height={816} />
+        <div className="avatar-wrap">
+          <img src={userPhoto} alt={user.name} className="avatar-xl" width={816} height={816} />
+          <button className="edit-badge" aria-label="Edit profile" onClick={() => { setDraft(user); setPanel("settings"); }}><SquarePen /></button>
+        </div>
         <div><h1>{user.name}</h1><p className="muted">{user.email}</p></div>
         <button className="icon-btn" aria-label="Settings" onClick={() => { setDraft(user); setPanel("settings"); }}><Settings /></button>
       </header>
-      <main className="menu">
-        {items.map(({ label, icon: Icon, action }) => <button key={label} className="menu-row" onClick={action}><Icon /><span>{label}</span><ChevronRight className="chev" /></button>)}
-        <button className="logout-btn" onClick={() => setPanel("logout")}>Log Out</button>
+      <main>
+        <div className="menu">
+          {items.map(({ label, icon: Icon, tint, action }) => <button key={label} className="menu-row" onClick={action}><span className={`menu-icon ${tint}`}><Icon /></span><span>{label}</span><ChevronRight className="chev" /></button>)}
+        </div>
+        <button className="logout-btn" onClick={() => setPanel("logout")}><LogOut />Log Out</button>
       </main>
       <BottomNav active="Profile" />
       {panel && (
