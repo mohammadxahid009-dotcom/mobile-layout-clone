@@ -1,5 +1,5 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { ArrowLeft, House, CalendarDays, MessageSquare, UserRound, Star, BadgeCheck } from "lucide-react";
+import { ArrowLeft, House, CalendarDays, MessageSquare, UserRound, Star, BadgeCheck, ShieldCheck } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import type { ReactNode } from "react";
 
@@ -43,13 +43,38 @@ export function BottomNav({ active }: { active: (typeof tabs)[number]["name"] })
 
   return (
     <nav ref={navRef} className="bottom-nav" aria-label="Main navigation">
+      {/* Desktop brand header shown only in left panel mode */}
+      <div className="desktop-nav-brand" aria-hidden="true">
+        <div className="desktop-nav-logo">
+          <ShieldCheck className="w-5 h-5 text-primary" />
+        </div>
+        <div className="desktop-nav-title">
+          <span className="desktop-brand-name">Budgam Services</span>
+          <span className="desktop-brand-sub">Local Experts</span>
+        </div>
+      </div>
+
       <span className="nav-capsule" data-slide style={slide} aria-hidden="true" />
       <span className="nav-dot" data-slide style={slide} aria-hidden="true" />
+
       {tabs.map(({ name, to, icon: Icon }) => (
-        <Link key={name} to={to} className={`nav-item ${name === active ? "nav-active" : ""}`} aria-current={name === active ? "page" : undefined}>
-          <Icon fill={name === active ? "currentColor" : "none"} /><span>{name}</span>
+        <Link
+          key={name}
+          to={to}
+          className={`nav-item ${name === active ? "nav-active" : ""}`}
+          aria-current={name === active ? "page" : undefined}
+        >
+          <Icon fill={name === active ? "currentColor" : "none"} />
+          <span>{name}</span>
         </Link>
       ))}
+
+      {/* Desktop footer chip shown only in left panel mode */}
+      <div className="desktop-nav-footer" aria-hidden="true">
+        <span className="chip-verified">
+          <BadgeCheck fill="currentColor" /> Verified
+        </span>
+      </div>
     </nav>
   );
 }

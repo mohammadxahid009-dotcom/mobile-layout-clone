@@ -669,3 +669,367 @@ body {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
+
+/* ==========================================================================
+   Desktop Responsive Layout & Left Panel Navigation
+   ========================================================================== */
+
+.desktop-nav-brand {
+  display: none;
+}
+.desktop-nav-footer {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  /* Allow desktop background and normal mouse interactions */
+  body {
+    background: var(--search-surface);
+  }
+
+  /* Expand app container for desktop screens */
+  .mobile-app {
+    max-width: 1040px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding-bottom: 48px;
+    background: var(--background);
+    box-shadow: 0 0 36px -12px oklch(0.2 0.02 250 / 8%);
+  }
+
+  /* When the page contains the navigation bar, offset content to make room for left panel bar */
+  .mobile-app:has(.bottom-nav) {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    max-width: none;
+    box-shadow: none;
+    background: var(--background);
+    padding-bottom: 48px;
+  }
+
+  .mobile-app.plain,
+  .mobile-app.with-cta,
+  .mobile-app.profile-page {
+    padding-bottom: 48px;
+  }
+
+  /* ---- Left Panel Navigation Bar ---- */
+  .bottom-nav {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    transform: none;
+    width: 260px;
+    max-width: 260px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 24px 16px 20px;
+    border-radius: 0;
+    border: 0;
+    border-right: 1px solid var(--soft-line);
+    background: var(--card);
+    box-shadow: 4px 0 24px -10px var(--nav-shadow);
+    z-index: 50;
+  }
+
+  .desktop-nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 10px 20px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--soft-line);
+    order: -1;
+  }
+
+  .desktop-nav-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--available-surface);
+    color: var(--primary);
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px var(--booking-shadow);
+  }
+
+  .desktop-nav-title {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .desktop-brand-name {
+    font-size: 16px;
+    font-weight: 750;
+    color: var(--foreground);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+
+  .desktop-brand-sub {
+    font-size: 12.5px;
+    color: var(--subtle-text);
+    font-weight: 500;
+  }
+
+  .desktop-nav-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: auto;
+    padding: 18px 8px 6px;
+    border-top: 1px solid var(--soft-line);
+    order: 10;
+  }
+
+  .desktop-nav-footer .chip-verified {
+    width: 100%;
+    justify-content: center;
+    height: 32px;
+    font-size: 13px;
+    border-radius: 10px;
+  }
+
+  .nav-capsule,
+  .nav-dot {
+    display: none !important;
+  }
+
+  .nav-item {
+    position: relative;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 14px;
+    width: 100%;
+    max-width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 13px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--nav-inactive);
+    transition: all 180ms ease;
+  }
+
+  .nav-item svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  .nav-item:hover:not(.nav-active) {
+    background: color-mix(in oklab, var(--muted) 65%, var(--card));
+    color: var(--foreground);
+    transform: translateX(2px);
+  }
+
+  .nav-item.nav-active {
+    background: linear-gradient(135deg, color-mix(in oklab, var(--booking-green) 14%, var(--card)), color-mix(in oklab, var(--booking-green) 7%, var(--card)));
+    color: var(--booking-green);
+    box-shadow: 0 3px 8px -3px var(--nav-icon-shadow);
+  }
+
+  .nav-item.nav-active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 4px;
+    border-radius: 0 4px 4px 0;
+    background: var(--booking-green);
+  }
+
+  /* ---- Home Page Desktop Layout ---- */
+  .landscape-header {
+    height: 310px;
+    border-radius: 0 0 28px 28px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .header-content {
+    max-width: 1020px;
+    margin: 0 auto;
+    padding: 36px 36px 0;
+  }
+  .greeting {
+    margin-top: 24px;
+  }
+  .greeting h1 {
+    font-size: 38px;
+  }
+  .greeting p {
+    font-size: 20px;
+  }
+  .search-field {
+    margin-top: 22px;
+    max-width: 620px;
+    height: 54px;
+  }
+  .home-content {
+    max-width: 1020px;
+    margin: 0 auto;
+    padding: 32px 36px 48px;
+  }
+  .service-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .service-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .service-tile {
+    height: 120px;
+    padding: 14px 6px 14px;
+    border-radius: 14px;
+  }
+  .service-icon {
+    width: 58px;
+    height: 58px;
+  }
+  .service-icon svg {
+    width: 36px;
+    height: 36px;
+  }
+  .service-name {
+    font-size: 13.5px;
+  }
+  .verified-strip {
+    max-width: 1020px;
+    height: 76px;
+    margin-top: 24px;
+    padding: 16px 24px;
+    border-radius: 14px;
+  }
+
+  /* ---- Bookings Page Desktop Layout ---- */
+  .bookings-page .page-head {
+    max-width: 1020px;
+    margin: 0 auto;
+    padding: 36px 36px 16px;
+  }
+  .bookings-page > .pill-row {
+    max-width: 1020px;
+    margin: 0 auto;
+    padding: 0 36px 24px;
+    display: flex;
+    gap: 12px;
+  }
+  .bookings-page > .pill-row .pill {
+    width: auto;
+    min-width: 130px;
+    padding: 0 20px;
+  }
+  .bookings-page .list-content {
+    max-width: 1020px;
+    margin: 0 auto;
+    padding: 0 36px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 20px;
+  }
+
+  /* ---- Messages Page Desktop Layout ---- */
+  .messages-page-head {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 36px 36px 16px;
+  }
+  .thread-list {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 8px 36px;
+    display: grid;
+    gap: 12px;
+  }
+  .thread {
+    padding: 16px 20px;
+    border-radius: 14px;
+    border: 1px solid var(--soft-line);
+    background: var(--card);
+    transition: all 180ms ease;
+  }
+  .thread:hover {
+    background: var(--card);
+    box-shadow: 0 6px 18px -6px var(--booking-shadow);
+    border-color: color-mix(in oklch, var(--primary) 25%, var(--soft-line));
+  }
+
+  /* ---- Profile Page Desktop Layout ---- */
+  .profile-head {
+    max-width: 920px;
+    margin: 36px auto 24px;
+    padding: 24px 30px;
+  }
+  .menu {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 8px 20px;
+  }
+  .logout-btn {
+    max-width: 920px;
+    margin: 28px auto 0;
+  }
+
+  /* ---- Service Category & Provider Detail Desktop Layout ---- */
+  .top-bar {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 26px 32px 14px;
+  }
+  .pill-row {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 8px 32px 20px;
+  }
+  .list-content {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+  .detail-block,
+  .gallery,
+  .form-content {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  .sticky-cta {
+    max-width: 880px;
+  }
+  .chat-app {
+    max-width: 880px;
+    margin: 0 auto;
+    border-left: 1px solid var(--soft-line);
+    border-right: 1px solid var(--soft-line);
+  }
+
+  /* ---- Modal / Popups on Desktop ---- */
+  .panel-backdrop {
+    align-items: center;
+    padding: 24px;
+  }
+  .detail-panel {
+    border-radius: 20px;
+    max-width: 520px;
+    padding: 28px 30px 36px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .mobile-app:has(.bottom-nav) {
+    margin-left: max(260px, calc(50vw - 560px + 130px));
+    max-width: 1120px;
+  }
+}
