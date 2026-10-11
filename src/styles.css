@@ -168,10 +168,11 @@ body { margin: 0; font-family: Arial, Helvetica, sans-serif; letter-spacing: 0; 
 .service-icon svg { width: 35px; height: 35px; }
 .service-electrician svg,.service-appliance svg,.service-carpenter svg { fill: currentColor; stroke-width: 1.5; }
 .service-plumber svg { fill: currentColor; }
-.service-name { font-size: 13px; line-height: 17px; font-weight: 600; white-space: normal; text-align: center; }
+.service-name { font-size: 12px; line-height: 17px; font-weight: 600; white-space: normal; text-align: center; }
 .verified-strip { width: 100%; height: 70px; margin-top: 18px; display: flex; justify-content: flex-start; gap: 13px; padding: 13px 17px; background: var(--verified-surface); border-radius: 11px; }
 .verified-strip:hover { background: var(--verified-surface); }
 .verified-strip .verified-shield { width: 38px; height: 43px; color: var(--verified-icon); stroke: var(--hero-foreground); stroke-width: 2.2; }
+.verified-shield path:first-child { stroke: var(--verified-icon); }
 .verified-strip > span { display: flex; flex-direction: column; text-align: left; gap: 4px; }
 .verified-strip strong { font-size: 16px; line-height: 19px; color: var(--foreground); }
 .verified-strip small { font-size: 13px; line-height: 16px; color: var(--subtle-text); font-weight: 400; }
