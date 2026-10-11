@@ -466,8 +466,8 @@ textarea.input { resize: none; line-height: 1.5; }
   --booking-red: oklch(0.56 0.2 20);
   --booking-shadow: oklch(0.36 0.035 250 / 8%);
   --booking-tab-surface: color-mix(in oklch, var(--muted) 75%, var(--background));
-  --booking-mint: color-mix(in oklch, var(--booking-green) 7%, var(--card));
-  --booking-rose: color-mix(in oklch, var(--booking-red) 6%, var(--card));
+  --booking-mint: color-mix(in oklab, var(--booking-green) 7%, var(--card));
+  --booking-rose: color-mix(in oklab, var(--booking-red) 6%, var(--card));
   --booking-card-gradient: linear-gradient(160deg, var(--card), color-mix(in oklch, var(--secondary) 32%, var(--card)));
   --booking-active-gradient: linear-gradient(135deg, var(--booking-green-highlight), var(--booking-green) 75%);
 }
@@ -494,7 +494,7 @@ textarea.input { resize: none; line-height: 1.5; }
 .bookings-page .meta.sm svg { width: 15px; height: 18px; }
 .bookings-page .status-row { margin-top: 6px; }
 .bookings-page .status { font-size: 12px; line-height: 18px; padding: 3px 10px; border-radius: 8px; }
-.bookings-page .status-completed { background: color-mix(in oklch, var(--booking-green) 13%, var(--card)); color: var(--booking-green); }
+.bookings-page .status-completed { background: color-mix(in oklab, var(--booking-green) 13%, var(--card)); color: var(--booking-green); }
 .bookings-page .booking-card .btn-pair { gap: 11px; }
 .bookings-page .booking-card .btn-pair, .bookings-page .booking-card .full { margin-top: 14px; }
 .bookings-page .booking-card .btn-sm { height: 40px; font-size: 14px; font-weight: 500; border-width: 1px; border-radius: 10px; padding: 0 10px; box-shadow: 0 2px 4px var(--booking-shadow); }
