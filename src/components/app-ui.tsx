@@ -31,13 +31,12 @@ export function BottomNav({ active }: { active: (typeof tabs)[number]["name"] })
       pill.style.transition = "none";
       pill.style.transform = `translateX(${from * 100}%)`;
     });
-    const frame = requestAnimationFrame(() => {
-      pills.forEach((pill) => {
-        pill.style.transition = "";
-        pill.style.transform = `translateX(${index * 100}%)`;
-      });
+    // Commit the start position before releasing the transition, so the glide is visible.
+    void navRef.current?.offsetWidth;
+    pills.forEach((pill) => {
+      pill.style.transition = "";
+      pill.style.transform = `translateX(${index * 100}%)`;
     });
-    return () => cancelAnimationFrame(frame);
   }, [index]);
 
   const slide = { transform: `translateX(${index * 100}%)` };
