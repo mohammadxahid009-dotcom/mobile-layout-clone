@@ -48,8 +48,8 @@ function BookingsPage() {
               </div>
               <div className="status-row"><span className={`status status-${b.status.toLowerCase()}`}>{b.status}</span></div>
               {b.status === "Pending" ? (
-                <div className="btn-pair"><button className="outline-btn sm" onClick={() => setDetail(b)}>View Details</button><button className="danger-btn sm" onClick={() => setConfirm(b)}>Cancel</button></div>
-              ) : <button className="outline-btn sm full" onClick={() => setDetail(b)}>View Details</button>}
+                <div className="btn-pair"><button className="outline-btn btn-sm" onClick={() => setDetail(b)}>View Details</button><button className="danger-btn btn-sm" onClick={() => setConfirm(b)}>Cancel</button></div>
+              ) : <button className="outline-btn btn-sm full" onClick={() => setDetail(b)}>View Details</button>}
             </article>
           );
         })}

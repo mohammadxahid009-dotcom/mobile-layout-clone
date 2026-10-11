@@ -254,7 +254,7 @@ a.service-tile { align-items: center; justify-content: center; text-decoration: 
 .danger-btn { background: var(--background); color: var(--destructive); border: 1.5px solid var(--destructive); }
 .danger-solid { background: var(--destructive); color: var(--destructive-foreground); border: 0; }
 .primary-btn svg, .outline-btn svg { width: 20px; height: 20px; }
-.sm { height: 38px; font-size: 13.5px; font-weight: 500; border-width: 1px; }
+.btn-sm { height: 38px; font-size: 13.5px; font-weight: 500; border-width: 1px; }
 .full { width: 100%; }
 .btn-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
 .all-services .outline-btn { justify-content: flex-start; height: 46px; color: var(--foreground); border: 1px solid var(--border); }
