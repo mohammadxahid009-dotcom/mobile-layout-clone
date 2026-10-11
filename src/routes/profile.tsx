@@ -1,0 +1,82 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState, type ReactNode } from "react";
+import { Settings, ClipboardList, Star, Heart, CircleHelp, Info, ShieldCheck, FileText, ChevronRight, X } from "lucide-react";
+import { toast } from "sonner";
+import { BottomNav, Rating } from "@/components/app-ui";
+import { getProvider, userPhoto } from "@/lib/data";
+import { useStore } from "@/lib/store";
+
+export const Route = createFileRoute("/profile")({
+  head: () => ({ meta: [
+    { title: "My Profile | Budgam Services" },
+    { name: "description", content: "Manage your account, saved providers, reviews and settings." },
+    { property: "og:title", content: "My Profile | Budgam Services" },
+    { property: "og:description", content: "Manage your Budgam Services account." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+  ] }),
+  component: ProfilePage,
+});
+
+type Panel = "settings" | "reviews" | "saved" | "help" | "about" | "privacy" | "terms" | "logout" | null;
+
+function ProfilePage() {
+  const { user, setUser, saved, toggleSaved, bookings, loggedIn, setLoggedIn } = useStore();
+  const navigate = useNavigate();
+  const [panel, setPanel] = useState<Panel>(null);
+  const [draft, setDraft] = useState(user);
+  const completed = bookings.filter(b => b.status === "Completed");
+
+  if (!loggedIn) return (
+    <div className="mobile-app plain">
+      <main className="signed-out"><img src={userPhoto} alt="" className="avatar-xl" width={816} height={816} /><h1>You're logged out</h1><p className="muted">Log back in to see your bookings and messages.</p><button className="primary-btn" onClick={() => setLoggedIn(true)}>Log In</button></main>
+      <BottomNav active="Profile" />
+    </div>
+  );
+
+  const items: { label: string; icon: typeof Star; action: () => void }[] = [
+    { label: "My Bookings", icon: ClipboardList, action: () => navigate({ to: "/bookings" }) },
+    { label: "My Reviews", icon: Star, action: () => setPanel("reviews") },
+    { label: "Saved Providers", icon: Heart, action: () => setPanel("saved") },
+    { label: "Help & Support", icon: CircleHelp, action: () => setPanel("help") },
+    { label: "About Us", icon: Info, action: () => setPanel("about") },
+    { label: "Privacy Policy", icon: ShieldCheck, action: () => setPanel("privacy") },
+    { label: "Terms & Conditions", icon: FileText, action: () => setPanel("terms") },
+  ];
+
+  const sheets: Record<Exclude<Panel, null>, { title: string; body: ReactNode }> = {
+    settings: { title: "Edit Profile", body: <form className="sheet-form" onSubmit={e => { e.preventDefault(); setUser(draft); setPanel(null); toast.success("Profile updated"); }}>
+      <label className="field"><span>Full name</span><input className="input" value={draft.name} onChange={e => setDraft({ ...draft, name: e.target.value })} required /></label>
+      <label className="field"><span>Email</span><input className="input" type="email" value={draft.email} onChange={e => setDraft({ ...draft, email: e.target.value })} required /></label>
+      <button className="primary-btn">Save</button></form> },
+    reviews: { title: "My Reviews", body: completed.length ? <div className="sheet-list">{completed.map(b => { const p = getProvider(b.providerId)!; return <div key={b.id} className="sheet-row"><img src={p.photo} alt="" className="avatar-sm" width={816} height={816} /><div><strong>{p.name}</strong><Rating value={5} reviews={1} /><p className="muted">Great work on {b.service.toLowerCase()}, very professional.</p></div></div>; })}</div> : <p className="panel-copy">You haven't reviewed anyone yet.</p> },
+    saved: { title: "Saved Providers", body: saved.length ? <div className="sheet-list">{saved.map(id => { const p = getProvider(id); if (!p) return null; return <div key={id} className="sheet-row"><img src={p.photo} alt="" className="avatar-sm" width={816} height={816} /><Link to="/provider/$id" params={{ id }} className="grow"><strong>{p.name}</strong><p className="muted">{p.role} • {p.area}</p></Link><button className="icon-btn heart-on" aria-label="Remove" onClick={() => toggleSaved(id)}><Heart fill="currentColor" /></button></div>; })}</div> : <p className="panel-copy">Tap the heart on a provider to save them here.</p> },
+    help: { title: "Help & Support", body: <div className="faq"><details><summary>How do I book a service?</summary><p>Pick a service on Home, choose a provider and tap Book Now.</p></details><details><summary>Can I cancel a booking?</summary><p>Yes — open My Bookings and tap Cancel on any upcoming booking.</p></details><details><summary>Are providers verified?</summary><p>Providers with a green Verified badge are background checked.</p></details><a href="mailto:support@budgamservices.in" className="primary-btn">Contact Support</a></div> },
+    about: { title: "About Us", body: <p className="panel-copy">Budgam Services connects you with trusted local electricians, plumbers, carpenters, mechanics and more across Budgam district.</p> },
+    privacy: { title: "Privacy Policy", body: <p className="panel-copy">We only use your name, contact details and location to connect you with providers you choose. We never sell your data.</p> },
+    terms: { title: "Terms & Conditions", body: <p className="panel-copy">Prices shown are approximate. Final charges are agreed directly between you and the provider before work begins.</p> },
+    logout: { title: "Log out?", body: <><p className="panel-copy">You'll need to log in again to see your bookings.</p><div className="btn-pair"><button className="outline-btn" onClick={() => setPanel(null)}>Stay</button><button className="danger-solid" onClick={() => { setLoggedIn(false); setPanel(null); }}>Log Out</button></div></> },
+  };
+
+  return (
+    <div className="mobile-app plain">
+      <header className="profile-head">
+        <img src={userPhoto} alt={user.name} className="avatar-xl" width={816} height={816} />
+        <div><h1>{user.name}</h1><p className="muted">{user.email}</p></div>
+        <button className="icon-btn" aria-label="Settings" onClick={() => { setDraft(user); setPanel("settings"); }}><Settings /></button>
+      </header>
+      <main className="menu">
+        {items.map(({ label, icon: Icon, action }) => <button key={label} className="menu-row" onClick={action}><Icon /><span>{label}</span><ChevronRight className="chev" /></button>)}
+        <button className="logout-btn" onClick={() => setPanel("logout")}>Log Out</button>
+      </main>
+      <BottomNav active="Profile" />
+      {panel && (
+        <div className="panel-backdrop" onClick={() => setPanel(null)}>
+          <section className="detail-panel" role="dialog" aria-modal="true" aria-label={sheets[panel].title} onClick={e => e.stopPropagation()}>
+            <div className="panel-heading"><h2>{sheets[panel].title}</h2><button className="icon-btn" aria-label="Close" onClick={() => setPanel(null)}><X /></button></div>
+            {sheets[panel].body}
+          </section>
+        </div>
+      )}
+    </div>
+  );
+}
