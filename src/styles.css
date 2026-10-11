@@ -591,6 +591,7 @@ html, body { min-height: 100%; }
 .profile-head h1 { font-size: 20px; font-weight: 750; margin: 0 0 5px; }
 .profile-head .muted { font-size: 14px; }
 .avatar-wrap { position: relative; flex-shrink: 0; }
+.profile-head .avatar-wrap { flex: 0 0 auto; }
 .profile-head .avatar-xl { display: block; width: 76px; height: 76px; border: 3px solid var(--card); box-shadow: 0 5px 12px -5px var(--profile-shadow); }
 .edit-badge {
   position: absolute; right: -2px; bottom: -2px;

@@ -17,7 +17,7 @@ const initial: State = {
     ],
   },
   saved: ["aamir-khan"],
-  user: { name: "Arif Hussain", email: "arif@gmail.com" },
+  user: { name: "Haroon Rashid", email: "haroonrashid@gmail.com" },
   loggedIn: true,
 };
 
@@ -36,7 +36,20 @@ const now = () => new Date().toLocaleTimeString("en-US", { hour: "numeric", minu
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<State>(initial);
   const [ready, setReady] = useState(false);
-  useEffect(() => { try { const raw = localStorage.getItem(KEY); if (raw) setState({ ...initial, ...JSON.parse(raw) }); } catch { /* ignore */ } setReady(true); }, []);
+  // A phone that already saved the old sample profile is upgraded in place, so the new name shows there too.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        const user = { ...initial.user, ...saved.user };
+        if (saved.user?.name === "Arif Hussain") user.name = initial.user.name;
+        if (saved.user?.email === "arif@gmail.com") user.email = initial.user.email;
+        setState({ ...initial, ...saved, user });
+      }
+    } catch { /* ignore */ }
+    setReady(true);
+  }, []);
   useEffect(() => { if (ready) localStorage.setItem(KEY, JSON.stringify(state)); }, [state, ready]);
 
   const value: Ctx = {
