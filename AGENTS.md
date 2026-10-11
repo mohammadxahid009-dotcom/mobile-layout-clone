@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep the mobile service home at `/`, with its presentation in global semantic CSS and local transient interaction state; this preserves the reference layout without implying connected booking services.
