@@ -28,11 +28,11 @@ function BookPage() {
     const label = d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
     return i === 0 ? `Tomorrow, ${label}` : `${d.toLocaleDateString("en-GB", { weekday: "short" })}, ${label}`;
   }), []);
-  const [service, setService] = useState(p.services[0]);
+  const [service, setService] = useState<string>(p.services[0] ?? "");
   const [description, setDescription] = useState("");
-  const [date, setDate] = useState(dates[0]);
-  const [time, setTime] = useState(times[1]);
-  const [location, setLocation] = useState(locations[0]);
+  const [date, setDate] = useState<string>(dates[0] ?? "");
+  const [time, setTime] = useState<string>(times[1]!);
+  const [location, setLocation] = useState<string>(locations[0]!);
 
   const submit = () => {
     addBooking({ providerId: p.id, service, description, date: date.replace(/ \d{4}$/, ""), time, location });

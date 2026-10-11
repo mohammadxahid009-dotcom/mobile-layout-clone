@@ -21,7 +21,7 @@ function MessagesPage() {
     <div className="mobile-app plain">
       <header className="page-head"><h1>Messages</h1></header>
       <main className="thread-list">
-        {threads.map(([id, msgs]) => { const p = getProvider(id); if (!p) return null; const last = msgs[msgs.length - 1]; return (
+        {threads.map(([id, msgs]) => { const p = getProvider(id); if (!p) return null; const last = msgs[msgs.length - 1]; if (!last) return null; return (
           <Link key={id} to="/chat/$id" params={{ id }} className="thread">
             <span className="avatar-wrap"><img src={p.photo} alt={p.name} className="avatar-md" loading="lazy" width={816} height={816} /><i className="online-dot" /></span>
             <div><div className="thread-top"><h2>{p.name}</h2><time>{last.time}</time></div><p>{last.from === "me" ? "You: " : ""}{last.text}</p></div>
