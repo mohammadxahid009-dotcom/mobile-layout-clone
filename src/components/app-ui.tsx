@@ -1,7 +1,19 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { ArrowLeft, House, CalendarDays, MessageSquare, UserRound, Star, BadgeCheck, ShieldCheck } from "lucide-react";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import {
+  ArrowLeft,
+  House,
+  CalendarDays,
+  MessageSquare,
+  UserRound,
+  Star,
+  BadgeCheck,
+  ShieldCheck,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { useSafeStore } from "@/lib/store";
 
 const tabs = [
   { name: "Home", to: "/", icon: House },
@@ -17,6 +29,18 @@ let mountedOnce = false;
 const useBeforePaintEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export function BottomNav({ active }: { active: (typeof tabs)[number]["name"] }) {
+  const store = useSafeStore();
+  const [localCollapsed, setLocalCollapsed] = useState(false);
+  const isCollapsed = store ? store.sidebarCollapsed : localCollapsed;
+
+  const toggleCollapse = () => {
+    if (store) {
+      store.toggleSidebar();
+    } else {
+      setLocalCollapsed((prev) => !prev);
+    }
+  };
+
   const index = Math.max(0, tabs.findIndex((tab) => tab.name === active));
   const navRef = useRef<HTMLElement>(null);
 
@@ -42,12 +66,28 @@ export function BottomNav({ active }: { active: (typeof tabs)[number]["name"] })
   const slide = { transform: `translateX(${index * 100}%)` };
 
   return (
-    <nav ref={navRef} className="bottom-nav" aria-label="Main navigation">
+    <nav
+      ref={navRef}
+      className={`bottom-nav ${isCollapsed ? "nav-collapsed" : ""}`}
+      data-collapsed={isCollapsed ? "true" : "false"}
+      aria-label="Main navigation"
+    >
       {/* Desktop brand header shown only in left panel mode */}
-      <div className="desktop-nav-brand" aria-hidden="true">
-        <div className="desktop-nav-logo">
-          <ShieldCheck className="w-5 h-5 text-primary" />
-        </div>
+      <div className="desktop-nav-brand">
+        <button
+          type="button"
+          className="desktop-nav-logo-btn"
+          onClick={toggleCollapse}
+          aria-label={isCollapsed ? "Expand sidebar panel" : "Collapse sidebar panel"}
+          title={isCollapsed ? "Expand sidebar (click to open)" : "Collapse sidebar (click to close)"}
+        >
+          <ShieldCheck className="brand-logo-icon" aria-hidden="true" />
+          {isCollapsed ? (
+            <PanelLeftOpen className="toggle-icon open-icon" aria-hidden="true" />
+          ) : (
+            <PanelLeftClose className="toggle-icon close-icon" aria-hidden="true" />
+          )}
+        </button>
         <div className="desktop-nav-title">
           <span className="desktop-brand-name">Budgam Services</span>
           <span className="desktop-brand-sub">Local Experts</span>
@@ -63,16 +103,18 @@ export function BottomNav({ active }: { active: (typeof tabs)[number]["name"] })
           to={to}
           className={`nav-item ${name === active ? "nav-active" : ""}`}
           aria-current={name === active ? "page" : undefined}
+          title={isCollapsed ? name : undefined}
         >
           <Icon fill={name === active ? "currentColor" : "none"} />
-          <span>{name}</span>
+          <span className="nav-label">{name}</span>
         </Link>
       ))}
 
       {/* Desktop footer chip shown only in left panel mode */}
       <div className="desktop-nav-footer" aria-hidden="true">
-        <span className="chip-verified">
-          <BadgeCheck fill="currentColor" /> Verified
+        <span className="chip-verified" title="Verified local services">
+          <BadgeCheck fill="currentColor" />
+          <span className="verified-text">Verified</span>
         </span>
       </div>
     </nav>

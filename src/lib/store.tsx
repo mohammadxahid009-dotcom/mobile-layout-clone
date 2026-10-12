@@ -28,14 +28,49 @@ type Ctx = State & {
   toggleSaved: (id: string) => void;
   setUser: (u: State["user"]) => void;
   setLoggedIn: (v: boolean) => void;
+  sidebarCollapsed: boolean;
+  toggleSidebar: () => void;
+  setSidebarCollapsed: (v: boolean) => void;
 };
 const StoreContext = createContext<Ctx | null>(null);
 const KEY = "budgam-services-v1";
 const now = () => new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 
+const SIDEBAR_STORAGE_KEY = "budgam-services-sidebar-collapsed";
+
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<State>(initial);
   const [ready, setReady] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsedState] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+      if (stored !== null) {
+        const val = stored === "true";
+        setSidebarCollapsedState(val);
+        if (val) {
+          document.documentElement.setAttribute("data-sidebar-collapsed", "true");
+        } else {
+          document.documentElement.removeAttribute("data-sidebar-collapsed");
+        }
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  const setSidebarCollapsed = (val: boolean) => {
+    setSidebarCollapsedState(val);
+    try {
+      localStorage.setItem(SIDEBAR_STORAGE_KEY, String(val));
+      if (val) {
+        document.documentElement.setAttribute("data-sidebar-collapsed", "true");
+      } else {
+        document.documentElement.removeAttribute("data-sidebar-collapsed");
+      }
+    } catch { /* ignore */ }
+  };
+
+  const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
   // A phone that already saved the old sample profile is upgraded in place, so the new name shows there too.
   useEffect(() => {
     try {
@@ -63,8 +98,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     toggleSaved: id => setState(s => ({ ...s, saved: s.saved.includes(id) ? s.saved.filter(x => x !== id) : [...s.saved, id] })),
     setUser: user => setState(s => ({ ...s, user })),
     setLoggedIn: loggedIn => setState(s => ({ ...s, loggedIn })),
+    sidebarCollapsed,
+    toggleSidebar,
+    setSidebarCollapsed,
   };
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
+}
+
+export function useSafeStore() {
+  return useContext(StoreContext);
 }
 
 export function useStore() {
