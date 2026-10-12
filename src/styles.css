@@ -1029,7 +1029,7 @@ body {
 
 @media (min-width: 1400px) {
   .mobile-app:has(.bottom-nav) {
-    margin-left: max(260px, calc(50vw - 560px + 131px));
+    margin-left: max(260px, calc(50vw - 560px + 130px));
     max-width: 1120px;
   }
 }
