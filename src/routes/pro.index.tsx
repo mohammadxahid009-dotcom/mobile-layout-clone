@@ -109,7 +109,7 @@ function Dashboard() {
             <UserRound className="h-5 w-5 text-muted-foreground" />
           </Card>
         </Link>
-        <p className="text-center text-xs text-muted-foreground">{reviews.length} reviews • <Link to="/" className="text-primary underline">Switch to customer app</Link></p>
+        <p className="text-center text-xs text-muted-foreground">{reviews.length} reviews • <Link to="/" onClick={() => { try { sessionStorage.setItem("selected_role", "customer"); } catch {} }} className="text-primary underline">Switch to customer app</Link></p>
       </div>
     </ProPage>
   );

@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { BottomNav } from "@/components/app-ui";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, MapPin, ChevronDown, Search, Zap, Droplet, Wrench, Hammer, Smartphone, CarFront, ShieldCheck, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import lake from "@/assets/kashmir-lake.jpg";
+import { ChooseRolePage } from "./choose-role";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -26,7 +27,7 @@ const services = [
   { name: "Mechanic", icon: CarFront, tone: "mechanic", slug: "mechanic" },
 ];
 
-function Index() {
+function CustomerHomeScreen() {
   const [query, setQuery] = useState("");
   const [panel, setPanel] = useState<string | null>(null);
   const [location, setLocation] = useState("Budgam");
@@ -63,3 +64,36 @@ function Index() {
   );
 }
 
+function Index() {
+  const navigate = useNavigate();
+  const [role, setRole] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("selected_role");
+      if (saved) {
+        setRole(saved);
+      }
+    } catch {
+      // sessionStorage unavailable
+    }
+    setReady(true);
+  }, []);
+
+  if (!ready || role !== "customer") {
+    return (
+      <ChooseRolePage
+        onRoleChosen={(chosen) => {
+          if (chosen === "customer") {
+            setRole("customer");
+          } else {
+            navigate({ to: "/pro" });
+          }
+        }}
+      />
+    );
+  }
+
+  return <CustomerHomeScreen />;
+}

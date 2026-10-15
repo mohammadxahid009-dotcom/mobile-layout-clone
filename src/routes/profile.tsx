@@ -33,7 +33,7 @@ function ProfilePage() {
   );
 
   const items: { label: string; icon: typeof Star; tint: string; action: () => void }[] = [
-    { label: "Switch to Service Provider", icon: ShieldCheck, tint: "tint-green", action: () => navigate({ to: "/pro" }) },
+    { label: "Switch to Service Provider", icon: ShieldCheck, tint: "tint-green", action: () => { try { sessionStorage.setItem("selected_role", "provider"); } catch {} navigate({ to: "/pro" }); } },
     { label: "My Bookings", icon: ClipboardList, tint: "tint-green", action: () => navigate({ to: "/bookings" }) },
     { label: "Saved Providers", icon: Heart, tint: "tint-pink", action: () => setPanel("saved") },
     { label: "Help & Support", icon: CircleHelp, tint: "tint-blue", action: () => setPanel("help") },

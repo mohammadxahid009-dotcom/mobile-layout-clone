@@ -46,7 +46,7 @@ function Profile() {
   const total = jobs.filter(j => j.proStatus === "Completed").length;
 
   const items: { label: string; icon: typeof Wrench; tint: string; action: () => void }[] = [
-    { label: "Switch to Customer App", icon: Repeat, tint: "tint-green", action: () => navigate({ to: "/" }) },
+    { label: "Switch to Customer App", icon: Repeat, tint: "tint-green", action: () => { try { sessionStorage.setItem("selected_role", "customer"); } catch {} navigate({ to: "/" }); } },
     { label: "My Services", icon: Wrench, tint: "tint-green", action: () => navigate({ to: "/pro/services" }) },
     { label: "My Schedule", icon: CalendarDays, tint: "tint-blue", action: () => navigate({ to: "/pro/schedule" }) },
     { label: "Earnings", icon: Wallet, tint: "tint-amber", action: () => navigate({ to: "/pro/earnings" }) },
