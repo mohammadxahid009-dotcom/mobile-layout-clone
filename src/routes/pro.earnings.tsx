@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { TrendingUp, Wrench, BarChart3 } from "lucide-react";
-import { Card, Empty, ProPage, proHead } from "@/components/pro-ui";
+import { TrendingUp, Wrench, BarChart3, Plus } from "lucide-react";
+import { toast } from "sonner";
+import { Card, Empty, ProPage, btnPrimary, inputCls, proHead } from "@/components/pro-ui";
 import { rupees, usePro } from "@/lib/pro-store";
 
 export const Route = createFileRoute("/pro/earnings")({
@@ -13,8 +14,13 @@ const periods = ["This Week", "This Month", "All Time"] as const;
 const DAY = 86400000;
 
 function Earnings() {
-  const { jobs } = usePro();
+  const { jobs, logPayment, services } = usePro();
   const [period, setPeriod] = useState<(typeof periods)[number]>("This Week");
+  const [adding, setAdding] = useState(false);
+  const [customer, setCustomer] = useState("");
+  const [service, setService] = useState("");
+  const [amount, setAmount] = useState("");
+  const [notes, setNotes] = useState("");
   const done = jobs.filter(j => j.proStatus === "Completed");
   const at = (j: (typeof done)[number]) => (j.completedAt ? new Date(j.completedAt) : j.when ?? new Date(0)).getTime();
   const now = Date.now();
@@ -29,9 +35,27 @@ function Earnings() {
     const g = acc[j.service] ??= { name: j.service, count: 0, sum: 0 }; g.count++; g.sum += j.amount; return acc;
   }, {})).sort((a, b) => b.sum - a.sum);
 
+  const savePayment = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const value = Number(amount);
+    if (!customer.trim() || !service.trim() || value <= 0) return;
+    logPayment({ customer: customer.trim(), service: service.trim(), amount: value, notes: notes.trim() });
+    setCustomer(""); setService(""); setAmount(""); setNotes(""); setAdding(false);
+    toast.success("Completed payment recorded");
+  };
+
   return (
-    <ProPage tab="Profile" title="Earnings">
+    <ProPage tab="Profile" title="Earnings" right={<button className={`${btnPrimary} gap-1 px-3 py-2`} onClick={() => setAdding(v => !v)}><Plus className="h-4 w-4" />{adding ? "Close" : "Record Payment"}</button>}>
       <div className="space-y-5 px-5">
+        {adding && <Card><form className="grid gap-3 sm:grid-cols-2" onSubmit={savePayment}>
+          <input className={inputCls} required placeholder="Customer name" value={customer} onChange={e => setCustomer(e.target.value)} />
+          <input className={inputCls} required placeholder="Service provided" list="earnings-service-options" value={service} onChange={e => setService(e.target.value)} />
+          <datalist id="earnings-service-options">{services.map(s => <option key={s.id} value={s.name} />)}</datalist>
+          <input className={inputCls} required inputMode="numeric" placeholder="Amount received (₹)" value={amount} onChange={e => setAmount(e.target.value.replace(/\\D/g, ""))} />
+          <input className={`${inputCls} sm:col-span-2`} placeholder="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} />
+          <button className={`${btnPrimary} sm:col-span-2`}>Save Completed Payment</button>
+          <p className="sm:col-span-2 text-xs text-muted-foreground">This creates a completed job record and updates your earnings on this device.</p>
+        </form></Card>}
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl bg-primary p-5 text-primary-foreground">
           <div className="min-w-0">
             <p className="text-sm opacity-80">Total Earnings ({period})</p>
@@ -51,7 +75,7 @@ function Earnings() {
               <b>{rupees(g.sum)}</b>
             </Card>
           ))}
-          {groups.length === 0 && <Empty>No completed jobs in this period yet.</Empty>}
+          {groups.length === 0 && <Empty>No completed jobs in this period yet. Record a completed payment when you finish a service.</Empty>}
         </div>
       </div>
     </ProPage>

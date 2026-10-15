@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BadgeCheck, Bell, CalendarCheck, ChevronRight, Clock, MessageSquare, ShieldCheck, UserRound, Wallet, Wrench, Star } from "lucide-react";
-import { Card, Empty, ProPage, proHead } from "@/components/pro-ui";
+import { Card, ProPage, proHead } from "@/components/pro-ui";
 import { rupees, sameDay, usePro } from "@/lib/pro-store";
 import { useStore } from "@/lib/store";
 
@@ -72,7 +72,21 @@ function Dashboard() {
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </Card>
           </Link>
-        ) : <Empty>No upcoming bookings. New customer requests will appear here.</Empty>}
+        ) : (
+          <Link to="/pro/bookings">
+            <Card className="pro-next-booking grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+              <div className="pro-next-booking-icon grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary">
+                <CalendarCheck className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">Next Booking</p>
+                <p className="truncate font-semibold">No upcoming bookings</p>
+                <p className="truncate text-xs text-muted-foreground">Tap to view bookings or record a job</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </Card>
+          </Link>
+        )}
 
         <section>
           <h2 className="mb-3 font-bold">Quick Actions</h2>
