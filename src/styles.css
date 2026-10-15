@@ -459,6 +459,29 @@ textarea.input { resize: none; line-height: 1.5; }
   }
 }
 
+
+/* Match servicemen screens to the customer app's top safe-area spacing and navigation. */
+@media (max-width: 767px) {
+  .pro-bookings-page > .pro-header,
+  .pro-messages-page > .pro-header {
+    padding-top: calc(36px + env(safe-area-inset-top, 0px));
+    min-height: calc(88px + env(safe-area-inset-top, 0px));
+  }
+  .pro-bookings-page > .pro-booking-tabs {
+    padding-top: 8px;
+    padding-bottom: 17px;
+  }
+  .pro-bookings-page > .pro-booking-list {
+    padding-top: 0;
+  }
+  .pro-messages-page > .pro-message-content {
+    padding-top: 8px;
+  }
+  .pro-messages-page > .pro-message-content > .relative {
+    margin-bottom: 12px;
+  }
+}
+
 /* Polished premium home surfaces */
 :root { --elev-shadow: oklch(0.35 0.03 250 / 0.10); --elev-shadow-strong: oklch(0.35 0.03 250 / 0.16); }
 .search-field { background: var(--background); border: 1px solid oklch(0.92 0.01 250); box-shadow: 0 10px 24px -8px var(--elev-shadow-strong), 0 2px 6px var(--elev-shadow); }

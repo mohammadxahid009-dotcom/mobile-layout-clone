@@ -1,4 +1,5 @@
 import { Link, useRouter } from "@tanstack/react-router";
+import { BottomNav } from "@/components/app-ui";
 import { ArrowLeft, House, CalendarDays, MessageSquare, UserRound, Wrench, CalendarClock, MapPin, IndianRupee } from "lucide-react";
 import type { ReactNode } from "react";
 import type { Job, JobStatus } from "@/lib/pro-store";
@@ -12,9 +13,9 @@ const tabs = [
 ] as const;
 export type ProTab = (typeof tabs)[number]["name"];
 
-export function ProPage({ children, tab, title, right, back = true }: { children: ReactNode; tab?: ProTab; title?: string; right?: ReactNode; back?: boolean }) {
+export function ProPage({ children, tab, title, right, back = true, className = "" }: { children: ReactNode; tab?: ProTab; title?: string; right?: ReactNode; back?: boolean; className?: string }) {
   return (
-    <div className="pro-provider-app mx-auto min-h-svh max-w-[480px] bg-background pb-32 text-foreground">
+    <div className={`pro-provider-app mx-auto min-h-svh max-w-[480px] bg-background pb-32 text-foreground ${className}`}>
       {title && (
         <header className="pro-header sticky top-0 z-10 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 bg-background/95 px-5 py-4 backdrop-blur">
           {back ? <ProBack /> : <span />}
@@ -23,7 +24,7 @@ export function ProPage({ children, tab, title, right, back = true }: { children
         </header>
       )}
       {children}
-      {tab && <ProNav active={tab} />}
+      {tab && <BottomNav active={tab} serviceProfessional />}
     </div>
   );
 }

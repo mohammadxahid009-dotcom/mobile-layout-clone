@@ -18,8 +18,8 @@ function Messages() {
     .filter(t => !q || t.last.text.toLowerCase().includes(q.toLowerCase()) || user.name.toLowerCase().includes(q.toLowerCase()));
 
   return (
-    <ProPage tab="Messages" title="Messages" back={false}>
-      <div className="px-5">
+    <ProPage className="pro-messages-page" tab="Messages" title="Messages" back={false}>
+      <div className="pro-message-content px-5">
         <div className="relative mb-3"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /><input className={`${inputCls} pl-9`} placeholder="Search messages" value={q} onChange={e => setQ(e.target.value)} /></div>
         <div className="divide-y divide-border">
           {threads.map(t => (

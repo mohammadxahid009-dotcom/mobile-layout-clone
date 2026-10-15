@@ -48,7 +48,7 @@ function ProBookings() {
   const list = jobs.filter(j => inTab(j, tab));
 
   return (
-    <ProPage tab="Bookings" title="My Bookings" back={false} right={<button className={`${btnPrimary} px-3 py-2`} onClick={() => setAdding(v => !v)}>{adding ? "Close" : "Add Booking"}</button>}>
+    <ProPage className="pro-bookings-page" tab="Bookings" title="My Bookings" back={false} right={<button className={`${btnPrimary} px-3 py-2`} onClick={() => setAdding(v => !v)}>{adding ? "Close" : "Add Booking"}</button>}>
       {adding && <div className="px-5 pb-4"><Card><form className="grid gap-3 sm:grid-cols-2" onSubmit={saveJob}>
         <input className={inputCls} required placeholder="Customer name" value={customer} onChange={e => setCustomer(e.target.value)} />
         <input className={inputCls} placeholder="Phone (optional)" inputMode="tel" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} />
@@ -61,7 +61,7 @@ function ProBookings() {
         <input className={`${inputCls} sm:col-span-2`} inputMode="numeric" placeholder="Agreed price in ₹ (optional)" value={amount} onChange={e => setAmount(e.target.value.replace(/\D/g, ""))} />
         <button className={`${btnPrimary} sm:col-span-2`}>Save Booking</button>
       </form></Card></div>}
-      <div className="flex gap-2 overflow-x-auto px-5 pb-4">
+      <div className="pro-booking-tabs flex gap-2 overflow-x-auto px-5 pb-4">
         {tabs.map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`shrink-0 rounded-xl px-4 py-2 text-sm font-medium ${tab === t ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
@@ -69,7 +69,7 @@ function ProBookings() {
           </button>
         ))}
       </div>
-      <div className="space-y-3 px-5">
+      <div className="pro-booking-list space-y-3 px-5">
         {list.map(j => (
           <Card key={j.id}>
             <JobSummary job={j} />

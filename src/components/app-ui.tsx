@@ -28,7 +28,14 @@ let lastIndex = 0;
 let mountedOnce = false;
 const useBeforePaintEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-export function BottomNav({ active }: { active: (typeof tabs)[number]["name"] }) {
+const proDestinations = {
+  Home: "/pro",
+  Bookings: "/pro/bookings",
+  Messages: "/pro/messages",
+  Profile: "/pro/profile",
+} as const;
+
+export function BottomNav({ active, serviceProfessional = false }: { active: (typeof tabs)[number]["name"]; serviceProfessional?: boolean }) {
   const store = useSafeStore();
   const [localCollapsed, setLocalCollapsed] = useState(false);
   const isCollapsed = store ? store.sidebarCollapsed : localCollapsed;
@@ -70,7 +77,7 @@ export function BottomNav({ active }: { active: (typeof tabs)[number]["name"] })
       ref={navRef}
       className={`bottom-nav ${isCollapsed ? "nav-collapsed" : ""}`}
       data-collapsed={isCollapsed ? "true" : "false"}
-      aria-label="Main navigation"
+      aria-label={serviceProfessional ? "Service professional navigation" : "Main navigation"}
     >
       {/* Desktop brand header shown only in left panel mode */}
       <div className="desktop-nav-brand">
@@ -100,7 +107,7 @@ export function BottomNav({ active }: { active: (typeof tabs)[number]["name"] })
       {tabs.map(({ name, to, icon: Icon }) => (
         <Link
           key={name}
-          to={to}
+          to={serviceProfessional ? proDestinations[name] : to}
           className={`nav-item ${name === active ? "nav-active" : ""}`}
           aria-current={name === active ? "page" : undefined}
           title={isCollapsed ? name : undefined}
