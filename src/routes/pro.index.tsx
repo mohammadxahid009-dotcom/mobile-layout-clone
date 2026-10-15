@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { BadgeCheck, Bell, CalendarCheck, ChevronRight, Clock, MessageSquare, ShieldCheck, UserRound, Wallet, Wrench, Star } from "lucide-react";
 import { Card, ProPage, proHead } from "@/components/pro-ui";
 import { rupees, sameDay, usePro } from "@/lib/pro-store";
 import { useStore } from "@/lib/store";
+import { getStoredUser } from "@/lib/firebase";
 
 export const Route = createFileRoute("/pro/")({
   head: () => proHead("Dashboard", "Today's earnings, next booking and quick actions for service professionals."),
@@ -17,6 +19,12 @@ function greeting() {
 function Dashboard() {
   const { jobs, profile, services } = usePro();
   const { reviews } = useStore();
+  const [authName, setAuthName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const u = getStoredUser();
+    if (u?.displayName) setAuthName(u.displayName);
+  }, []);
   const today = new Date();
   const doneToday = jobs.filter(j => j.proStatus === "Completed" && j.completedAt && sameDay(new Date(j.completedAt), today));
   const pending = jobs.filter(j => j.proStatus === "Pending").length;
@@ -40,7 +48,7 @@ function Dashboard() {
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
           <div className="min-w-0">
             <p className="text-sm opacity-80">{greeting()},</p>
-            <h1 className="truncate text-2xl font-bold">{profile.name || "Service Professional"}</h1>
+            <h1 className="truncate text-2xl font-bold">{authName || profile.name || "Service Professional"}</h1>
             <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary-foreground px-2.5 py-1 text-xs font-semibold text-primary"><BadgeCheck className="h-3.5 w-3.5" />Service Provider</span>
           </div>
           <Link to="/pro/bookings" aria-label="Pending requests" className="relative grid h-10 w-10 place-items-center rounded-full bg-primary-foreground/15">

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import {
   CalendarDays,
   ChevronRight,
@@ -14,25 +14,31 @@ import {
   Settings,
   SquarePen,
   X,
+  LogOut,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ProPage, proHead } from "@/components/pro-ui";
 import { userPhoto } from "@/lib/data";
 import { usePro } from "@/lib/pro-store";
 import { useStore } from "@/lib/store";
+import { getStoredUser, logOutUser, type StoredAuthUser } from "@/lib/firebase";
 
 export const Route = createFileRoute("/pro/profile")({
-  head: () => proHead("Profile", "Your service provider profile, rating and settings."),
+  head: () =>
+    proHead("Profile", "Your service provider profile, rating and settings."),
   component: Profile,
 });
 
 const infoContent: Record<string, string> = {
-  about: "Budgam Services connects local customers with trusted professionals for home and business services across Budgam district.",
-  privacy: "Your profile and booking information is only shared with customers you work with. We never sell your personal information.",
-  terms: "Service providers agree to honour accepted bookings, quote fair prices, follow safety standards, and treat customers respectfully.",
+  about:
+    "Budgam Services connects local customers with trusted professionals for home and business services across Budgam district.",
+  privacy:
+    "Your profile and booking information is only shared with customers you work with. We never sell your personal information.",
+  terms:
+    "Service providers agree to honour accepted bookings, quote fair prices, follow safety standards, and treat customers respectfully.",
 };
 
-type SheetPanel = "settings" | "about" | "privacy" | "terms" | null;
+type SheetPanel = "settings" | "about" | "privacy" | "terms" | "logout" | null;
 
 function Profile() {
   const { profile, setProfile, jobs } = usePro();
@@ -41,29 +47,113 @@ function Profile() {
 
   const [panel, setPanel] = useState<SheetPanel>(null);
   const [draft, setDraft] = useState(profile);
+  const [authUser, setAuthUser] = useState<StoredAuthUser | null>(null);
 
-  const avg = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : "–";
-  const total = jobs.filter(j => j.proStatus === "Completed").length;
+  useEffect(() => {
+    const stored = getStoredUser();
+    if (stored) {
+      setAuthUser(stored);
+      if (stored.displayName && !profile.name) {
+        setProfile({
+          ...profile,
+          name: stored.displayName,
+        });
+      }
+    }
+  }, []);
 
-  const items: { label: string; icon: typeof Wrench; tint: string; action: () => void }[] = [
-    { label: "Switch to Customer App", icon: Repeat, tint: "tint-green", action: () => { try { sessionStorage.setItem("selected_role", "customer"); } catch {} navigate({ to: "/" }); } },
-    { label: "My Services", icon: Wrench, tint: "tint-green", action: () => navigate({ to: "/pro/services" }) },
-    { label: "My Schedule", icon: CalendarDays, tint: "tint-blue", action: () => navigate({ to: "/pro/schedule" }) },
-    { label: "Earnings", icon: Wallet, tint: "tint-amber", action: () => navigate({ to: "/pro/earnings" }) },
-    { label: "Reviews", icon: Star, tint: "tint-amber", action: () => navigate({ to: "/pro/reviews" }) },
-    { label: "Help & Support", icon: CircleHelp, tint: "tint-blue", action: () => navigate({ to: "/pro/help" }) },
-    { label: "About Us", icon: Info, tint: "tint-purple", action: () => setPanel("about") },
-    { label: "Privacy Policy", icon: ShieldCheck, tint: "tint-mint", action: () => setPanel("privacy") },
-    { label: "Terms & Conditions", icon: FileText, tint: "tint-blue", action: () => setPanel("terms") },
+  const handleLogout = async () => {
+    await logOutUser();
+    setPanel(null);
+    toast.success("Logged out successfully");
+    navigate({ to: "/" });
+  };
+
+  const displayName = authUser?.displayName || profile.name || "Haroon Rashid";
+  const displayAvatar = authUser?.photoURL || userPhoto;
+
+  const avg = reviews.length
+    ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
+    : "–";
+  const total = jobs.filter((j) => j.proStatus === "Completed").length;
+
+  const items: {
+    label: string;
+    icon: typeof Wrench;
+    tint: string;
+    action: () => void;
+  }[] = [
+    {
+      label: "Switch to Customer App",
+      icon: Repeat,
+      tint: "tint-green",
+      action: () => {
+        try {
+          sessionStorage.setItem("selected_role", "customer");
+        } catch {}
+        navigate({ to: "/" });
+      },
+    },
+    {
+      label: "My Services",
+      icon: Wrench,
+      tint: "tint-green",
+      action: () => navigate({ to: "/pro/services" }),
+    },
+    {
+      label: "My Schedule",
+      icon: CalendarDays,
+      tint: "tint-blue",
+      action: () => navigate({ to: "/pro/schedule" }),
+    },
+    {
+      label: "Earnings",
+      icon: Wallet,
+      tint: "tint-amber",
+      action: () => navigate({ to: "/pro/earnings" }),
+    },
+    {
+      label: "Reviews",
+      icon: Star,
+      tint: "tint-amber",
+      action: () => navigate({ to: "/pro/reviews" }),
+    },
+    {
+      label: "Help & Support",
+      icon: CircleHelp,
+      tint: "tint-blue",
+      action: () => navigate({ to: "/pro/help" }),
+    },
+    {
+      label: "About Us",
+      icon: Info,
+      tint: "tint-purple",
+      action: () => setPanel("about"),
+    },
+    {
+      label: "Privacy Policy",
+      icon: ShieldCheck,
+      tint: "tint-mint",
+      action: () => setPanel("privacy"),
+    },
+    {
+      label: "Terms & Conditions",
+      icon: FileText,
+      tint: "tint-blue",
+      action: () => setPanel("terms"),
+    },
   ];
 
-  const sheets: Record<Exclude<SheetPanel, null>, { title: string; body: ReactNode }> = {
+  const sheets: Record<
+    Exclude<SheetPanel, null>,
+    { title: string; body: ReactNode }
+  > = {
     settings: {
       title: "Edit Profile",
       body: (
         <form
           className="sheet-form"
-          onSubmit={e => {
+          onSubmit={(e) => {
             e.preventDefault();
             setProfile(draft);
             setPanel(null);
@@ -75,7 +165,7 @@ function Profile() {
             <input
               className="input"
               value={draft.name}
-              onChange={e => setDraft({ ...draft, name: e.target.value })}
+              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
               placeholder="e.g. Haroon Rashid"
               required
             />
@@ -86,7 +176,7 @@ function Profile() {
               className="input"
               type="tel"
               value={draft.phone}
-              onChange={e => setDraft({ ...draft, phone: e.target.value })}
+              onChange={(e) => setDraft({ ...draft, phone: e.target.value })}
               placeholder="e.g. +91 94190 12345"
             />
           </label>
@@ -95,7 +185,7 @@ function Profile() {
             <input
               className="input"
               value={draft.area}
-              onChange={e => setDraft({ ...draft, area: e.target.value })}
+              onChange={(e) => setDraft({ ...draft, area: e.target.value })}
               placeholder="e.g. Chadoora, Budgam"
             />
           </label>
@@ -105,11 +195,13 @@ function Profile() {
               className="input"
               rows={3}
               value={draft.bio}
-              onChange={e => setDraft({ ...draft, bio: e.target.value })}
+              onChange={(e) => setDraft({ ...draft, bio: e.target.value })}
               placeholder="Describe your skills, experience, and service guarantees..."
             />
           </label>
-          <button className="primary-btn" type="submit">Save Profile</button>
+          <button className="primary-btn" type="submit">
+            Save Profile
+          </button>
         </form>
       ),
     },
@@ -125,18 +217,42 @@ function Profile() {
       title: "Terms & Conditions",
       body: <p className="panel-copy">{infoContent.terms}</p>,
     },
+    logout: {
+      title: "Log out?",
+      body: (
+        <>
+          <p className="panel-copy">
+            You'll need to sign back in with your account to access your provider dashboard.
+          </p>
+          <div className="btn-pair">
+            <button className="outline-btn" onClick={() => setPanel(null)}>
+              Stay
+            </button>
+            <button className="danger-solid" onClick={handleLogout}>
+              Log Out
+            </button>
+          </div>
+        </>
+      ),
+    },
   };
 
   return (
     <ProPage tab="Profile" className="profile-page">
       <header className="profile-head">
         <div className="avatar-wrap">
-          <img src={userPhoto} alt={profile.name || "Service Provider"} className="avatar-xl" width={816} height={816} />
+          <img
+            src={displayAvatar}
+            alt={displayName}
+            className="avatar-xl rounded-full object-cover"
+            width={816}
+            height={816}
+          />
           <button
             className="edit-badge"
             aria-label="Edit profile"
             onClick={() => {
-              setDraft(profile);
+              setDraft({ ...profile, name: displayName });
               setPanel("settings");
             }}
           >
@@ -144,16 +260,18 @@ function Profile() {
           </button>
         </div>
         <div>
-          <h1>{profile.name || "Haroon Rashid"}</h1>
+          <h1>{displayName}</h1>
           <p className="muted">
-            {profile.phone ? `${profile.phone} • ${profile.area || "Budgam"}` : "Service Professional • Budgam"}
+            {profile.phone
+              ? `${profile.phone} • ${profile.area || "Budgam"}`
+              : "Service Professional • Budgam"}
           </p>
         </div>
         <button
           className="icon-btn"
           aria-label="Settings"
           onClick={() => {
-            setDraft(profile);
+            setDraft({ ...profile, name: displayName });
             setPanel("settings");
           }}
         >
@@ -162,7 +280,7 @@ function Profile() {
       </header>
 
       <main className="space-y-4">
-        {/* Quick performance stats bar styled to complement the profile cards */}
+        {/* Quick performance stats bar */}
         <div className="mx-4 grid grid-cols-3 divide-x divide-border rounded-2xl border border-soft-line bg-card p-3 text-center shadow-sm">
           <div>
             <p className="text-lg font-bold text-primary">{avg}</p>
@@ -196,6 +314,11 @@ function Profile() {
             </button>
           ))}
         </div>
+
+        <button className="logout-btn mx-4" onClick={() => setPanel("logout")}>
+          <LogOut />
+          Log Out
+        </button>
       </main>
 
       {panel && (
@@ -205,11 +328,15 @@ function Profile() {
             role="dialog"
             aria-modal="true"
             aria-label={sheets[panel].title}
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="panel-heading">
               <h2>{sheets[panel].title}</h2>
-              <button className="icon-btn" aria-label="Close" onClick={() => setPanel(null)}>
+              <button
+                className="icon-btn"
+                aria-label="Close"
+                onClick={() => setPanel(null)}
+              >
                 <X />
               </button>
             </div>
