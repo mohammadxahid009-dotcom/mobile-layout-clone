@@ -18,12 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import lake from "@/assets/kashmir-lake.jpg";
-import { ChooseRolePage } from "./choose-role";
-import {
-  getStoredUser,
-  initAuthListener,
-  type StoredAuthUser,
-} from "@/lib/firebase";
+import { getStoredUser, type StoredAuthUser } from "@/lib/firebase";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -240,50 +235,22 @@ function CustomerHomeScreen() {
 
 function Index() {
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState<StoredAuthUser | null>(null);
-  const [ready, setReady] = useState(false);
+  const [currentUser, setCurrentUser] = useState<StoredAuthUser | null>(() =>
+    getStoredUser()
+  );
 
   useEffect(() => {
-    // Check localStorage for persisted user session
-    const saved = getStoredUser();
-    if (saved) {
-      setCurrentUser(saved);
-      if (saved.role === "provider") {
-        navigate({ to: "/pro" });
-      }
+    const user = getStoredUser();
+    setCurrentUser(user);
+    if (user?.role === "provider") {
+      navigate({ to: "/pro" });
     }
-
-    // Keep state in sync with Firebase
-    const unsubscribe = initAuthListener((u) => {
-      if (u) {
-        setCurrentUser(u);
-      }
-    });
-
-    setReady(true);
-    return () => unsubscribe();
   }, [navigate]);
 
-  if (!ready) {
+  // If user role is provider, redirecting to /pro
+  if (currentUser?.role === "provider") {
     return null;
   }
 
-  // If user is authenticated as customer, show Customer Home
-  if (currentUser && currentUser.role === "customer") {
-    return <CustomerHomeScreen />;
-  }
-
-  // Otherwise show the onboarding flow (Role Selection -> Login Screen)
-  return (
-    <ChooseRolePage
-      onRoleChosen={(chosen) => {
-        if (chosen === "customer") {
-          const fresh = getStoredUser();
-          setCurrentUser(fresh);
-        } else {
-          navigate({ to: "/pro" });
-        }
-      }}
-    />
-  );
+  return <CustomerHomeScreen />;
 }

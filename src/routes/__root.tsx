@@ -8,12 +8,18 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { StoreProvider } from "@/lib/store";
 import { Toaster } from "@/components/ui/sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import {
+  getStoredUser,
+  initAuthListener,
+  type StoredAuthUser,
+} from "@/lib/firebase";
+import { ChooseRolePage } from "./choose-role";
 
 function NotFoundComponent() {
   return (
@@ -124,6 +130,76 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * Global authentication barrier:
+ * Nobody can access any page, feature, or route in the app without logging in first.
+ * If unauthenticated, displays the Choose Role & Welcome/Login onboarding flow.
+ */
+function GlobalAuthGate() {
+  const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<StoredAuthUser | null>(() =>
+    getStoredUser()
+  );
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    // Read from localStorage synchronously on mount
+    const stored = getStoredUser();
+    if (stored) {
+      setCurrentUser(stored);
+    }
+
+    // Keep active session in sync with Firebase Auth
+    const unsubscribe = initAuthListener((fbUser) => {
+      setCurrentUser(fbUser);
+    });
+
+    setReady(true);
+    return () => unsubscribe();
+  }, []);
+
+  // SSR or before mount: if stored user is present, render outlet
+  if (!ready) {
+    if (currentUser) {
+      return <Outlet />;
+    }
+    // Prevent unauthenticated flash during hydration
+    return (
+      <ChooseRolePage
+        onRoleChosen={(chosenRole) => {
+          const fresh = getStoredUser();
+          setCurrentUser(fresh);
+          if (chosenRole === "provider") {
+            router.navigate({ to: "/pro" });
+          } else {
+            router.navigate({ to: "/" });
+          }
+        }}
+      />
+    );
+  }
+
+  // If user is authenticated, allow full access to all app routes
+  if (currentUser) {
+    return <Outlet />;
+  }
+
+  // If unauthenticated: completely lock out the app and show the role + login screen
+  return (
+    <ChooseRolePage
+      onRoleChosen={(chosenRole) => {
+        const fresh = getStoredUser();
+        setCurrentUser(fresh);
+        if (chosenRole === "provider") {
+          router.navigate({ to: "/pro" });
+        } else {
+          router.navigate({ to: "/" });
+        }
+      }}
+    />
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -147,12 +223,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <StoreProvider>
-        <Outlet />
+        {/* Protected by GlobalAuthGate: nobody can enter without logging in */}
+        <GlobalAuthGate />
         <Toaster position="top-center" />
       </StoreProvider>
     </QueryClientProvider>
   );
 }
-
