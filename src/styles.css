@@ -1177,3 +1177,116 @@ body {
   }
 }
 
+/* Service provider dashboard: raised, softly tinted surfaces from the reference. */
+:root {
+  --pro-surface-shadow: color-mix(in oklch, var(--foreground) 13%, transparent);
+  --pro-green-shadow: color-mix(in oklch, var(--booking-green) 22%, transparent);
+  --pro-action-blue: var(--menu-icon-blue);
+  --pro-action-blue-ink: var(--menu-ink-blue);
+  --pro-action-violet: var(--menu-icon-purple);
+  --pro-action-violet-ink: var(--menu-ink-purple);
+  --pro-action-amber: var(--menu-icon-amber);
+  --pro-action-amber-ink: var(--menu-ink-amber);
+  --pro-action-rose: var(--menu-icon-pink);
+  --pro-action-rose-ink: var(--menu-ink-pink);
+}
+.dark {
+  --pro-surface-shadow: color-mix(in oklch, var(--foreground) 24%, transparent);
+  --pro-green-shadow: color-mix(in oklch, var(--booking-green) 18%, transparent);
+}
+.pro-dashboard-header {
+  padding-top: 1.25rem;
+  padding-bottom: 1rem;
+  background: linear-gradient(145deg, color-mix(in oklch, var(--booking-green-highlight) 45%, var(--primary)), var(--primary) 58%, color-mix(in oklch, var(--booking-green) 80%, var(--primary)));
+  box-shadow: 0 16px 30px -20px var(--pro-green-shadow);
+}
+.pro-earnings-card {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  border: 1px solid color-mix(in oklch, var(--primary-foreground) 35%, transparent);
+  background: linear-gradient(135deg, color-mix(in oklch, var(--primary-foreground) 19%, var(--primary)), color-mix(in oklch, var(--booking-green-highlight) 38%, var(--primary)) 55%, color-mix(in oklch, var(--primary-foreground) 12%, var(--primary)));
+  box-shadow: inset 0 1px 0 color-mix(in oklch, var(--primary-foreground) 30%, transparent), 0 12px 24px -12px var(--pro-surface-shadow), 0 4px 10px -7px var(--pro-green-shadow);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.pro-earnings-card:active { transform: translateY(1px); }
+.pro-provider-app .pro-next-booking {
+  border-color: color-mix(in oklch, var(--booking-green) 13%, var(--border));
+  background: linear-gradient(145deg, var(--card), color-mix(in oklch, var(--booking-mint) 55%, var(--card)));
+  box-shadow: 0 12px 24px -15px var(--pro-surface-shadow), 0 3px 8px -6px var(--pro-green-shadow), inset 0 1px 0 var(--card);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.pro-provider-app a:has(.pro-next-booking):active .pro-next-booking { transform: translateY(1px); }
+.pro-next-booking-icon {
+  border: 1px solid color-mix(in oklch, var(--booking-green) 12%, var(--border));
+  background: linear-gradient(145deg, var(--card), var(--booking-mint));
+  box-shadow: 0 5px 12px -7px var(--pro-green-shadow), inset 0 1px 0 var(--card);
+}
+.pro-action-tile {
+  --pro-tile-surface: var(--menu-icon-green);
+  --pro-tile-ink: var(--menu-ink-green);
+  min-height: 88px;
+  gap: 0.25rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+  border: 1px solid color-mix(in oklch, var(--pro-tile-ink) 18%, var(--pro-tile-surface));
+  background: linear-gradient(155deg, color-mix(in oklch, var(--card) 45%, var(--pro-tile-surface)), var(--pro-tile-surface) 75%);
+  box-shadow: 0 9px 17px -12px color-mix(in oklch, var(--pro-tile-ink) 42%, transparent), 0 3px 7px -5px var(--pro-surface-shadow), inset 0 1px 0 color-mix(in oklch, var(--card) 85%, transparent);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.pro-action-tile:nth-child(2) { --pro-tile-surface: var(--pro-action-blue); --pro-tile-ink: var(--pro-action-blue-ink); }
+.pro-action-tile:nth-child(3) { --pro-tile-surface: var(--pro-action-violet); --pro-tile-ink: var(--pro-action-violet-ink); }
+.pro-action-tile:nth-child(4) { --pro-tile-surface: var(--pro-action-amber); --pro-tile-ink: var(--pro-action-amber-ink); }
+.pro-action-tile:nth-child(5) { --pro-tile-surface: var(--menu-icon-mint); --pro-tile-ink: var(--menu-ink-mint); }
+.pro-action-tile:nth-child(6) { --pro-tile-surface: var(--pro-action-rose); --pro-tile-ink: var(--pro-action-rose-ink); }
+.pro-action-tile:active { transform: translateY(1px); }
+.pro-action-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid color-mix(in oklch, var(--pro-tile-ink) 13%, var(--card));
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 25%, var(--card), color-mix(in oklch, var(--pro-tile-surface) 62%, var(--card)) 72%);
+  color: var(--pro-tile-ink);
+  box-shadow: inset 0 1px 2px color-mix(in oklch, var(--card) 80%, transparent), 0 5px 10px -6px color-mix(in oklch, var(--pro-tile-ink) 45%, transparent);
+}
+.pro-action-icon svg { filter: drop-shadow(0 2px 2px color-mix(in oklch, var(--pro-tile-ink) 20%, transparent)); }
+.pro-complete-profile {
+  border-color: color-mix(in oklch, var(--booking-green) 15%, var(--border));
+  background: linear-gradient(120deg, color-mix(in oklch, var(--booking-mint) 72%, var(--card)), color-mix(in oklch, var(--menu-icon-mint) 55%, var(--card)) 65%, var(--card));
+  box-shadow: 0 11px 22px -15px var(--pro-green-shadow), 0 3px 8px -6px var(--pro-surface-shadow), inset 0 1px 0 var(--card);
+}
+.pro-complete-profile > svg:first-child { filter: drop-shadow(0 3px 4px var(--pro-green-shadow)); }
+.pro-provider-nav {
+  border-color: color-mix(in oklch, var(--booking-green) 14%, var(--border));
+  background: linear-gradient(180deg, var(--card), color-mix(in oklch, var(--booking-mint) 32%, var(--card)));
+  box-shadow: 0 18px 35px -12px var(--pro-surface-shadow), 0 6px 14px -8px var(--pro-green-shadow), inset 0 1px 0 var(--card);
+  backdrop-filter: blur(18px);
+}
+.pro-provider-nav-item { min-height: 58px; }
+.pro-provider-nav-active {
+  background: linear-gradient(150deg, color-mix(in oklch, var(--booking-mint) 72%, var(--card)), color-mix(in oklch, var(--booking-green) 12%, var(--card)));
+  box-shadow: inset 0 1px 0 var(--card), 0 5px 12px -9px var(--pro-green-shadow);
+  font-weight: 700;
+}
+.pro-provider-nav-active svg { filter: drop-shadow(0 2px 2px var(--pro-green-shadow)); }
+@media (prefers-reduced-motion: reduce) {
+  .pro-earnings-card, .pro-next-booking, .pro-action-tile { transition: none; }
+}
+
+
+/* ---- provider: shared depth for all screens ---- */
+.pro-provider-app { background: linear-gradient(180deg, color-mix(in oklch, var(--booking-mint) 35%, var(--background)), var(--background) 320px); }
+.pro-header { background: color-mix(in oklch, var(--background) 88%, transparent); box-shadow: 0 1px 0 color-mix(in oklch, var(--booking-green) 10%, var(--border)), 0 8px 16px -14px var(--pro-surface-shadow); }
+.pro-card { border-color: color-mix(in oklch, var(--booking-green) 11%, var(--border)); background: linear-gradient(150deg, var(--card), color-mix(in oklch, var(--booking-mint) 30%, var(--card))); box-shadow: 0 12px 24px -16px var(--pro-surface-shadow), 0 3px 8px -6px var(--pro-green-shadow), inset 0 1px 0 var(--card); }
+a:active > .pro-card, button:active > .pro-card { transform: translateY(1px); }
+.pro-icon-tile { background: linear-gradient(145deg, color-mix(in oklch, var(--booking-green-highlight) 40%, var(--primary)), var(--primary)); box-shadow: inset 0 1px 0 color-mix(in oklch, var(--primary-foreground) 30%, transparent), 0 6px 12px -6px var(--pro-green-shadow); }
+.pro-chip { box-shadow: inset 0 1px 0 color-mix(in oklch, var(--card) 70%, transparent), 0 2px 5px -3px var(--pro-surface-shadow); border: 1px solid color-mix(in oklch, currentColor 15%, transparent); }
+.pro-empty { background: linear-gradient(150deg, var(--card), color-mix(in oklch, var(--booking-mint) 40%, var(--card))); border-color: color-mix(in oklch, var(--booking-green) 22%, var(--border)); box-shadow: inset 0 2px 6px -4px var(--pro-surface-shadow); }
+.pro-btn { box-shadow: inset 0 1px 0 color-mix(in oklch, var(--card) 35%, transparent), 0 5px 12px -8px var(--pro-surface-shadow); transition: transform 150ms ease, box-shadow 150ms ease, background 150ms; }
+.pro-btn.bg-primary { background: linear-gradient(150deg, color-mix(in oklch, var(--booking-green-highlight) 35%, var(--primary)), var(--primary)); box-shadow: inset 0 1px 0 color-mix(in oklch, var(--primary-foreground) 30%, transparent), 0 8px 16px -8px var(--pro-green-shadow); }
+.pro-btn:active { transform: translateY(1px); }
+.pro-provider-app input, .pro-provider-app textarea, .pro-provider-app select { box-shadow: inset 0 1px 3px color-mix(in oklch, var(--pro-surface-shadow) 60%, transparent); }
+.pro-provider-app [role="tablist"], .pro-provider-app .pro-tabs { box-shadow: inset 0 1px 3px color-mix(in oklch, var(--pro-surface-shadow) 70%, transparent); }
+.pro-provider-app [role="tab"][aria-selected="true"] { box-shadow: 0 4px 10px -6px var(--pro-green-shadow), inset 0 1px 0 color-mix(in oklch, var(--card) 40%, transparent); }

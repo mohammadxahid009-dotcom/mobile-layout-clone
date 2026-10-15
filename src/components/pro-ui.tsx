@@ -14,9 +14,9 @@ export type ProTab = (typeof tabs)[number]["name"];
 
 export function ProPage({ children, tab, title, right, back = true }: { children: ReactNode; tab?: ProTab; title?: string; right?: ReactNode; back?: boolean }) {
   return (
-    <div className="mx-auto min-h-svh max-w-[480px] bg-background pb-32 text-foreground">
+    <div className="pro-provider-app mx-auto min-h-svh max-w-[480px] bg-background pb-32 text-foreground">
       {title && (
-        <header className="sticky top-0 z-10 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 bg-background/95 px-5 py-4 backdrop-blur">
+        <header className="pro-header sticky top-0 z-10 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 bg-background/95 px-5 py-4 backdrop-blur">
           {back ? <ProBack /> : <span />}
           <h1 className="truncate text-xl font-bold">{title}</h1>
           {right ?? <span />}
@@ -40,12 +40,12 @@ function ProBack() {
 
 export function ProNav({ active }: { active: ProTab }) {
   return (
-    <nav aria-label="Service provider navigation" className="fixed inset-x-0 bottom-4 z-20 mx-auto grid w-[calc(100%-2rem)] max-w-[448px] grid-cols-4 rounded-3xl border border-border bg-card p-2 shadow-[0_12px_32px_-12px_color-mix(in_oklab,var(--foreground)_30%,transparent)]">
+    <nav aria-label="Service provider navigation" className="pro-provider-nav fixed inset-x-0 bottom-4 z-20 mx-auto grid w-[calc(100%-2rem)] max-w-[448px] grid-cols-4 rounded-3xl border border-border bg-card p-2 shadow-[0_12px_32px_-12px_color-mix(in_oklab,var(--foreground)_30%,transparent)]">
       {tabs.map(({ name, to, icon: Icon }) => {
         const on = name === active;
         return (
           <Link key={name} to={to} aria-current={on ? "page" : undefined}
-            className={`flex flex-col items-center gap-1 rounded-2xl py-2 text-[11px] font-medium transition-colors ${on ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}>
+            className={`pro-provider-nav-item flex flex-col items-center gap-1 rounded-2xl py-2 text-[11px] font-medium transition-colors ${on ? "pro-provider-nav-active bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}>
             <Icon className="h-5 w-5" fill={on ? "currentColor" : "none"} />
             {name}
           </Link>
@@ -56,7 +56,7 @@ export function ProNav({ active }: { active: ProTab }) {
 }
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-2xl border border-border bg-card p-4 shadow-[0_6px_20px_-12px_color-mix(in_oklab,var(--foreground)_25%,transparent)] ${className}`}>{children}</div>;
+  return <div className={`pro-card rounded-2xl border p-4 ${className}`}>{children}</div>;
 }
 
 const statusTone: Record<JobStatus, string> = {
@@ -67,11 +67,11 @@ const statusTone: Record<JobStatus, string> = {
   Cancelled: "bg-destructive/10 text-destructive",
 };
 export function StatusChip({ status }: { status: JobStatus }) {
-  return <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusTone[status]}`}>{status}</span>;
+  return <span className={`pro-chip shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusTone[status]}`}>{status}</span>;
 }
 
 export function IconTile({ children }: { children: ReactNode }) {
-  return <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground">{children}</div>;
+  return <div className="pro-icon-tile grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-primary-foreground">{children}</div>;
 }
 
 export function JobSummary({ job }: { job: Job }) {
@@ -93,10 +93,10 @@ export function JobSummary({ job }: { job: Job }) {
 }
 
 export function Empty({ children }: { children: ReactNode }) {
-  return <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">{children}</div>;
+  return <div className="pro-empty rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">{children}</div>;
 }
 
-export const btn = "inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors";
+export const btn = "pro-btn inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors";
 export const btnPrimary = `${btn} bg-primary text-primary-foreground hover:bg-primary/90`;
 export const btnOutline = `${btn} border border-primary text-primary hover:bg-primary/5`;
 export const btnDanger = `${btn} border border-destructive text-destructive hover:bg-destructive/5`;

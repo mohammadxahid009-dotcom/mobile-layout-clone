@@ -36,7 +36,7 @@ function Dashboard() {
 
   return (
     <ProPage tab="Home">
-      <section className="rounded-b-[2rem] bg-primary px-5 pb-6 pt-8 text-primary-foreground">
+      <section className="pro-dashboard-header rounded-b-[2rem] bg-primary px-5 pb-6 pt-8 text-primary-foreground">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
           <div className="min-w-0">
             <p className="text-sm opacity-80">{greeting()},</p>
@@ -48,7 +48,7 @@ function Dashboard() {
             {pending > 0 && <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">{pending}</span>}
           </Link>
         </div>
-        <Link to="/pro/earnings" className="mt-5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl bg-primary-foreground/12 p-4 ring-1 ring-primary-foreground/20">
+        <Link to="/pro/earnings" className="pro-earnings-card mt-5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl bg-primary-foreground/12 p-4 ring-1 ring-primary-foreground/20">
           <Wallet className="h-8 w-8 opacity-90" />
           <div className="min-w-0">
             <p className="text-xs opacity-80">Today's Earnings</p>
@@ -62,8 +62,8 @@ function Dashboard() {
       <div className="space-y-5 px-5 pt-5">
         {next ? (
           <Link to="/pro/booking/$id" params={{ id: next.id }}>
-            <Card className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-              <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary"><CalendarCheck className="h-5 w-5" /></div>
+            <Card className="pro-next-booking grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+              <div className="pro-next-booking-icon grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary"><CalendarCheck className="h-5 w-5" /></div>
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">Next Booking</p>
                 <p className="truncate font-semibold">{next.date} • {next.time}</p>
@@ -78,15 +78,15 @@ function Dashboard() {
           <h2 className="mb-3 font-bold">Quick Actions</h2>
           <div className="grid grid-cols-3 gap-3">
             {actions.map(({ label, to, icon: Icon }) => (
-              <Link key={label} to={to} className="flex flex-col items-center gap-2 rounded-2xl bg-primary/5 p-4 text-center text-xs font-medium transition-colors hover:bg-primary/10">
-                <Icon className="h-6 w-6 text-primary" />{label}
+              <Link key={label} to={to} className="pro-action-tile flex flex-col items-center gap-2 rounded-2xl bg-primary/5 p-4 text-center text-xs font-medium transition-colors hover:bg-primary/10">
+                <span className="pro-action-icon"><Icon className="h-6 w-6" /></span>{label}
               </Link>
             ))}
           </div>
         </section>
 
         <Link to="/pro/profile">
-          <Card className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 bg-primary/5">
+          <Card className="pro-complete-profile grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 bg-primary/5">
             <ShieldCheck className="h-8 w-8 text-primary" />
             <div className="min-w-0">
               <p className="font-semibold text-primary">{profileIncomplete ? "Complete your profile" : "Stay Professional"}</p>
