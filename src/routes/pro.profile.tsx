@@ -14,6 +14,7 @@ import {
   Settings,
   SquarePen,
   X,
+  LogOut,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ProPage, proHead } from "@/components/pro-ui";
@@ -32,11 +33,11 @@ const infoContent: Record<string, string> = {
   terms: "Service providers agree to honour accepted bookings, quote fair prices, follow safety standards, and treat customers respectfully.",
 };
 
-type SheetPanel = "settings" | "about" | "privacy" | "terms" | null;
+type SheetPanel = "settings" | "about" | "privacy" | "terms" | "logout" | null;
 
 function Profile() {
   const { profile, setProfile, jobs } = usePro();
-  const { reviews } = useStore();
+  const { reviews, setLoggedIn } = useStore();
   const navigate = useNavigate();
 
   const [panel, setPanel] = useState<SheetPanel>(null);
@@ -125,6 +126,18 @@ function Profile() {
       title: "Terms & Conditions",
       body: <p className="panel-copy">{infoContent.terms}</p>,
     },
+    logout: {
+      title: "Log out?",
+      body: (
+        <>
+          <p className="panel-copy">You'll need to log in again to access your provider account.</p>
+          <div className="btn-pair">
+            <button className="outline-btn" onClick={() => setPanel(null)}>Stay</button>
+            <button className="danger-solid" onClick={() => { setLoggedIn(false); setPanel(null); navigate({ to: "/choose-role" }); }}>Log Out</button>
+          </div>
+        </>
+      ),
+    },
   };
 
   return (
@@ -196,6 +209,7 @@ function Profile() {
             </button>
           ))}
         </div>
+        <button className="logout-btn" onClick={() => setPanel("logout")}><LogOut />Log Out</button>
       </main>
 
       {panel && (

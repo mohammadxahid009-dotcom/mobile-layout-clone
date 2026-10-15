@@ -27,7 +27,7 @@ function ProfilePage() {
 
   if (!loggedIn) return (
     <div className="mobile-app plain">
-      <main className="signed-out"><img src={userPhoto} alt="" className="avatar-xl" width={816} height={816} /><h1>You're logged out</h1><p className="muted">Log back in to see your bookings and messages.</p><button className="primary-btn" onClick={() => setLoggedIn(true)}>Log In</button></main>
+      <main className="signed-out"><img src={userPhoto} alt="" className="avatar-xl" width={816} height={816} /><h1>You're logged out</h1><p className="muted">Log back in to see your bookings and messages.</p><button className="primary-btn" onClick={() => navigate({ to: "/choose-role" })}>Log In</button></main>
       <BottomNav active="Profile" />
     </div>
   );
@@ -52,7 +52,7 @@ function ProfilePage() {
     about: { title: "About Us", body: <p className="panel-copy">Budgam Services connects you with trusted local electricians, plumbers, carpenters, mechanics and more across Budgam district.</p> },
     privacy: { title: "Privacy Policy", body: <p className="panel-copy">We only use your name, contact details and location to connect you with providers you choose. We never sell your data.</p> },
     terms: { title: "Terms & Conditions", body: <p className="panel-copy">Prices shown are approximate. Final charges are agreed directly between you and the provider before work begins.</p> },
-    logout: { title: "Log out?", body: <><p className="panel-copy">You'll need to log in again to see your bookings.</p><div className="btn-pair"><button className="outline-btn" onClick={() => setPanel(null)}>Stay</button><button className="danger-solid" onClick={() => { setLoggedIn(false); setPanel(null); }}>Log Out</button></div></> },
+    logout: { title: "Log out?", body: <><p className="panel-copy">You'll need to log in again to see your bookings.</p><div className="btn-pair"><button className="outline-btn" onClick={() => setPanel(null)}>Stay</button><button className="danger-solid" onClick={() => { setLoggedIn(false); setPanel(null); navigate({ to: "/choose-role" }); }}>Log Out</button></div></> },
   };
 
   return (

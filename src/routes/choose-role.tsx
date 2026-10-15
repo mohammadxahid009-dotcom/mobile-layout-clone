@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { User, Wrench, Check, ChevronRight } from "lucide-react";
+import { useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/choose-role")({
   head: () => ({
@@ -17,8 +18,10 @@ type RoleOption = "customer" | "provider";
 function ChooseRolePage() {
   const [selectedRole, setSelectedRole] = useState<RoleOption>("provider");
   const navigate = useNavigate();
+  const { setLoggedIn } = useStore();
 
   const handleContinue = () => {
+    setLoggedIn(true);
     if (selectedRole === "customer") {
       navigate({ to: "/" });
     } else {

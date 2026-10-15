@@ -22,4 +22,11 @@ describe("App routing", () => {
 
     expect(matches.at(-1)?.routeId).toBe("/choose-role");
   });
+
+  it("matches customer and provider routes", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    expect(router.matchRoutes("/profile").at(-1)?.routeId).toBe("/profile");
+    expect(router.matchRoutes("/pro/profile").at(-1)?.routeId).toBe("/pro/profile");
+  });
 });
