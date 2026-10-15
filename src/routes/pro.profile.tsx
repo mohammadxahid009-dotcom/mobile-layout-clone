@@ -1,8 +1,23 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { BadgeCheck, CalendarDays, ChevronRight, CircleHelp, FileText, Info, Pencil, Repeat, ShieldCheck, Star, UserRound, Wallet, Wrench } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState, type ReactNode } from "react";
+import {
+  CalendarDays,
+  ChevronRight,
+  CircleHelp,
+  FileText,
+  Info,
+  Repeat,
+  ShieldCheck,
+  Star,
+  Wallet,
+  Wrench,
+  Settings,
+  SquarePen,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
-import { Card, ProPage, btnOutline, btnPrimary, inputCls, proHead } from "@/components/pro-ui";
+import { ProPage, proHead } from "@/components/pro-ui";
+import { userPhoto } from "@/lib/data";
 import { usePro } from "@/lib/pro-store";
 import { useStore } from "@/lib/store";
 
@@ -11,79 +26,197 @@ export const Route = createFileRoute("/pro/profile")({
   component: Profile,
 });
 
-const info: Record<string, string> = {
-  "About Us": "Budgam Services connects local customers with trusted professionals for home and business services.",
-  "Privacy Policy": "Your profile and booking information is only shared with customers you work with.",
-  "Terms & Conditions": "Providers agree to honour accepted bookings, quote fair prices and treat customers respectfully.",
+const infoContent: Record<string, string> = {
+  about: "Budgam Services connects local customers with trusted professionals for home and business services across Budgam district.",
+  privacy: "Your profile and booking information is only shared with customers you work with. We never sell your personal information.",
+  terms: "Service providers agree to honour accepted bookings, quote fair prices, follow safety standards, and treat customers respectfully.",
 };
+
+type SheetPanel = "settings" | "about" | "privacy" | "terms" | null;
 
 function Profile() {
   const { profile, setProfile, jobs } = usePro();
   const { reviews } = useStore();
-  const [editing, setEditing] = useState(false);
+  const navigate = useNavigate();
+
+  const [panel, setPanel] = useState<SheetPanel>(null);
   const [draft, setDraft] = useState(profile);
-  const [open, setOpen] = useState<string | null>(null);
+
   const avg = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : "–";
   const total = jobs.filter(j => j.proStatus === "Completed").length;
 
-  const links = [
-    { label: "My Services", to: "/pro/services", icon: Wrench },
-    { label: "My Schedule", to: "/pro/schedule", icon: CalendarDays },
-    { label: "Earnings", to: "/pro/earnings", icon: Wallet },
-    { label: "Reviews", to: "/pro/reviews", icon: Star },
-    { label: "Help & Support", to: "/pro/help", icon: CircleHelp },
-  ] as const;
+  const items: { label: string; icon: typeof Wrench; tint: string; action: () => void }[] = [
+    { label: "Switch to Customer App", icon: Repeat, tint: "tint-green", action: () => navigate({ to: "/" }) },
+    { label: "My Services", icon: Wrench, tint: "tint-green", action: () => navigate({ to: "/pro/services" }) },
+    { label: "My Schedule", icon: CalendarDays, tint: "tint-blue", action: () => navigate({ to: "/pro/schedule" }) },
+    { label: "Earnings", icon: Wallet, tint: "tint-amber", action: () => navigate({ to: "/pro/earnings" }) },
+    { label: "Reviews", icon: Star, tint: "tint-amber", action: () => navigate({ to: "/pro/reviews" }) },
+    { label: "Help & Support", icon: CircleHelp, tint: "tint-blue", action: () => navigate({ to: "/pro/help" }) },
+    { label: "About Us", icon: Info, tint: "tint-purple", action: () => setPanel("about") },
+    { label: "Privacy Policy", icon: ShieldCheck, tint: "tint-mint", action: () => setPanel("privacy") },
+    { label: "Terms & Conditions", icon: FileText, tint: "tint-blue", action: () => setPanel("terms") },
+  ];
+
+  const sheets: Record<Exclude<SheetPanel, null>, { title: string; body: ReactNode }> = {
+    settings: {
+      title: "Edit Profile",
+      body: (
+        <form
+          className="sheet-form"
+          onSubmit={e => {
+            e.preventDefault();
+            setProfile(draft);
+            setPanel(null);
+            toast.success("Profile saved");
+          }}
+        >
+          <label className="field">
+            <span>Full name</span>
+            <input
+              className="input"
+              value={draft.name}
+              onChange={e => setDraft({ ...draft, name: e.target.value })}
+              placeholder="e.g. Haroon Rashid"
+              required
+            />
+          </label>
+          <label className="field">
+            <span>Phone number</span>
+            <input
+              className="input"
+              type="tel"
+              value={draft.phone}
+              onChange={e => setDraft({ ...draft, phone: e.target.value })}
+              placeholder="e.g. +91 94190 12345"
+            />
+          </label>
+          <label className="field">
+            <span>Service area</span>
+            <input
+              className="input"
+              value={draft.area}
+              onChange={e => setDraft({ ...draft, area: e.target.value })}
+              placeholder="e.g. Chadoora, Budgam"
+            />
+          </label>
+          <label className="field">
+            <span>About your work</span>
+            <textarea
+              className="input"
+              rows={3}
+              value={draft.bio}
+              onChange={e => setDraft({ ...draft, bio: e.target.value })}
+              placeholder="Describe your skills, experience, and service guarantees..."
+            />
+          </label>
+          <button className="primary-btn" type="submit">Save Profile</button>
+        </form>
+      ),
+    },
+    about: {
+      title: "About Us",
+      body: <p className="panel-copy">{infoContent.about}</p>,
+    },
+    privacy: {
+      title: "Privacy Policy",
+      body: <p className="panel-copy">{infoContent.privacy}</p>,
+    },
+    terms: {
+      title: "Terms & Conditions",
+      body: <p className="panel-copy">{infoContent.terms}</p>,
+    },
+  };
 
   return (
-    <ProPage tab="Profile">
-      <section className="rounded-b-[2rem] bg-primary px-5 pb-6 pt-8 text-primary-foreground">
-        <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4">
-          <div className="grid h-16 w-16 place-items-center rounded-full bg-primary-foreground/15 ring-2 ring-primary-foreground/40"><UserRound className="h-8 w-8" /></div>
-          <div className="min-w-0">
-            <h1 className="truncate text-xl font-bold">{profile.name || "Your name"}</h1>
-            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary-foreground px-2.5 py-0.5 text-xs font-semibold text-primary"><BadgeCheck className="h-3.5 w-3.5" />Service Provider</span>
-          </div>
-          <button aria-label="Edit profile" className="rounded-full p-2 hover:bg-primary-foreground/15" onClick={() => { setDraft(profile); setEditing(e => !e); }}><Pencil className="h-5 w-5" /></button>
+    <ProPage tab="Profile" className="profile-page">
+      <header className="profile-head">
+        <div className="avatar-wrap">
+          <img src={userPhoto} alt={profile.name || "Service Provider"} className="avatar-xl" width={816} height={816} />
+          <button
+            className="edit-badge"
+            aria-label="Edit profile"
+            onClick={() => {
+              setDraft(profile);
+              setPanel("settings");
+            }}
+          >
+            <SquarePen />
+          </button>
         </div>
-      </section>
-      <div className="space-y-4 px-5 pt-4">
-        <Card className="grid grid-cols-3 divide-x divide-border text-center">
-          <div><p className="font-bold">{avg}</p><p className="text-xs text-muted-foreground">Rating</p></div>
-          <div><p className="font-bold">{reviews.length}</p><p className="text-xs text-muted-foreground">Reviews</p></div>
-          <div><p className="font-bold">{total}</p><p className="text-xs text-muted-foreground">Total Jobs</p></div>
-        </Card>
+        <div>
+          <h1>{profile.name || "Haroon Rashid"}</h1>
+          <p className="muted">
+            {profile.phone ? `${profile.phone} • ${profile.area || "Budgam"}` : "Service Professional • Budgam"}
+          </p>
+        </div>
+        <button
+          className="icon-btn"
+          aria-label="Settings"
+          onClick={() => {
+            setDraft(profile);
+            setPanel("settings");
+          }}
+        >
+          <Settings />
+        </button>
+      </header>
 
-        {editing && (
-          <Card>
-            <form className="space-y-3" onSubmit={e => { e.preventDefault(); setProfile(draft); setEditing(false); toast.success("Profile saved"); }}>
-              <input className={inputCls} placeholder="Full name" value={draft.name} onChange={e => setDraft({ ...draft, name: e.target.value })} />
-              <input className={inputCls} placeholder="Phone number" inputMode="tel" value={draft.phone} onChange={e => setDraft({ ...draft, phone: e.target.value })} />
-              <input className={inputCls} placeholder="Service area, e.g. Chadoora, Budgam" value={draft.area} onChange={e => setDraft({ ...draft, area: e.target.value })} />
-              <textarea className={inputCls} rows={3} placeholder="About your work" value={draft.bio} onChange={e => setDraft({ ...draft, bio: e.target.value })} />
-              <div className="grid grid-cols-2 gap-3"><button type="button" className={btnOutline} onClick={() => setEditing(false)}>Cancel</button><button className={btnPrimary}>Save</button></div>
-            </form>
-          </Card>
-        )}
-        {!editing && (profile.phone || profile.area || profile.bio) && (
-          <Card className="space-y-1 text-sm">{profile.phone && <p>📞 {profile.phone}</p>}{profile.area && <p>📍 {profile.area}</p>}{profile.bio && <p className="text-muted-foreground">{profile.bio}</p>}</Card>
+      <main className="space-y-4">
+        {/* Quick performance stats bar styled to complement the profile cards */}
+        <div className="mx-4 grid grid-cols-3 divide-x divide-border rounded-2xl border border-soft-line bg-card p-3 text-center shadow-sm">
+          <div>
+            <p className="text-lg font-bold text-primary">{avg}</p>
+            <p className="text-[11px] font-medium text-muted-foreground">Rating</p>
+          </div>
+          <div>
+            <p className="text-lg font-bold text-primary">{reviews.length}</p>
+            <p className="text-[11px] font-medium text-muted-foreground">Reviews</p>
+          </div>
+          <div>
+            <p className="text-lg font-bold text-primary">{total}</p>
+            <p className="text-[11px] font-medium text-muted-foreground">Total Jobs</p>
+          </div>
+        </div>
+
+        {profile.bio && (
+          <div className="mx-4 rounded-2xl border border-soft-line bg-card p-3 text-xs text-muted-foreground shadow-sm">
+            <p className="font-semibold text-foreground mb-1">About Me</p>
+            <p>{profile.bio}</p>
+          </div>
         )}
 
-        <Card className="divide-y divide-border p-0">
-          {links.map(({ label, to, icon: Icon }) => (
-            <Link key={label} to={to} className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted/50"><Icon className="h-5 w-5 text-primary" /><span className="flex-1">{label}</span><ChevronRight className="h-4 w-4 text-muted-foreground" /></Link>
+        <div className="menu">
+          {items.map(({ label, icon: Icon, tint, action }) => (
+            <button key={label} className="menu-row" onClick={action}>
+              <span className={`menu-icon ${tint}`}>
+                <Icon />
+              </span>
+              <span>{label}</span>
+              <ChevronRight className="chev" />
+            </button>
           ))}
-          {Object.keys(info).map(label => (
-            <div key={label}>
-              <button className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-muted/50" onClick={() => setOpen(open === label ? null : label)}>
-                {label === "About Us" ? <Info className="h-5 w-5 text-primary" /> : label === "Privacy Policy" ? <ShieldCheck className="h-5 w-5 text-primary" /> : <FileText className="h-5 w-5 text-primary" />}
-                <span className="flex-1">{label}</span><ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${open === label ? "rotate-90" : ""}`} />
+        </div>
+      </main>
+
+      {panel && (
+        <div className="panel-backdrop" onClick={() => setPanel(null)}>
+          <section
+            className="detail-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label={sheets[panel].title}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="panel-heading">
+              <h2>{sheets[panel].title}</h2>
+              <button className="icon-btn" aria-label="Close" onClick={() => setPanel(null)}>
+                <X />
               </button>
-              {open === label && <p className="px-4 pb-3 text-sm text-muted-foreground">{info[label]}</p>}
             </div>
-          ))}
-          <Link to="/" className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-primary hover:bg-muted/50"><Repeat className="h-5 w-5" /><span className="flex-1">Switch to Customer App</span></Link>
-        </Card>
-      </div>
+            {sheets[panel].body}
+          </section>
+        </div>
+      )}
     </ProPage>
   );
 }
