@@ -229,7 +229,13 @@ body::-webkit-scrollbar { width: 0; height: 0; display: none; }
 :root { --soft-line: oklch(0.94 0.008 250); --bubble-me: oklch(0.93 0.06 150); --bubble-them: oklch(0.96 0.004 250); --rating: oklch(0.8 0.16 80); --available-surface: oklch(0.96 0.04 150); --pending-surface: oklch(0.96 0.06 85); --pending-ink: oklch(0.62 0.14 65); --danger-surface: oklch(0.97 0.02 20); --tick: oklch(0.62 0.15 240); }
 .nav-item { align-items: center; justify-content: center; text-decoration: none; }
 a.service-tile { align-items: center; justify-content: center; text-decoration: none; transition: background .15s; }
-.mobile-app.plain { padding-bottom: 90px; }
+.mobile-app.plain {
+  padding-bottom: 90px;
+  background: var(--top-fade-gradient);
+  background-repeat: no-repeat;
+  background-size: 100% 280px;
+  background-color: var(--background);
+}
 .mobile-app.with-cta { padding-bottom: 100px; }
 .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; background: transparent; border: 0; color: var(--foreground); cursor: pointer; }
 .icon-btn svg { width: 24px; height: 24px; }
@@ -508,6 +514,7 @@ textarea.input { resize: none; line-height: 1.5; }
   --booking-rose: color-mix(in oklab, var(--booking-red) 6%, var(--card));
   --booking-card-gradient: linear-gradient(160deg, var(--card), color-mix(in oklch, var(--secondary) 32%, var(--card)));
   --booking-active-gradient: linear-gradient(135deg, var(--booking-green-highlight), var(--booking-green) 75%);
+  --top-fade-gradient: linear-gradient(180deg, color-mix(in oklch, var(--booking-green) 18%, var(--card)) 0%, color-mix(in oklch, var(--booking-green) 6%, var(--background)) 52%, var(--background) 100%);
 }
 .dark {
   --booking-green: oklch(0.75 0.13 163);
@@ -515,6 +522,7 @@ textarea.input { resize: none; line-height: 1.5; }
   --booking-on-green: oklch(0.18 0.03 163);
   --booking-red: oklch(0.75 0.15 20);
   --booking-shadow: oklch(0.08 0.01 250 / 30%);
+  --top-fade-gradient: linear-gradient(180deg, color-mix(in oklch, var(--booking-green) 22%, var(--background)) 0%, color-mix(in oklch, var(--booking-green) 8%, var(--background)) 55%, var(--background) 100%);
 }
 .bookings-page .page-head { padding: 36px 16px 8px; }
 .bookings-page .page-head h1 { font-size: 26px; line-height: 32px; font-weight: 750; }
@@ -1313,3 +1321,103 @@ a:active > .pro-card, button:active > .pro-card { transform: translateY(1px); }
 .pro-provider-app input, .pro-provider-app textarea, .pro-provider-app select { box-shadow: inset 0 1px 3px color-mix(in oklch, var(--pro-surface-shadow) 60%, transparent); }
 .pro-provider-app [role="tablist"], .pro-provider-app .pro-tabs { box-shadow: inset 0 1px 3px color-mix(in oklch, var(--pro-surface-shadow) 70%, transparent); }
 .pro-provider-app [role="tab"][aria-selected="true"] { box-shadow: 0 4px 10px -6px var(--pro-green-shadow), inset 0 1px 0 color-mix(in oklch, var(--card) 40%, transparent); }
+
+/* ---- Customer Messages Screen Options & Enhancements ---- */
+.messages-controls {
+  padding: 0 16px 12px;
+}
+.messages-controls .pill-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  padding: 0 0 12px;
+  overflow: visible;
+}
+.messages-controls .pill-row .pill {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 8px;
+  font-size: 14px;
+  background: linear-gradient(180deg, var(--card), var(--booking-tab-surface));
+  box-shadow: 0 4px 10px -4px var(--booking-shadow);
+  border-radius: 999px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+.messages-controls .pill-row .pill-active {
+  background: var(--booking-active-gradient);
+  color: var(--booking-on-green);
+  font-weight: 600;
+  box-shadow: 0 6px 14px -5px color-mix(in oklch, var(--booking-green) 32%, transparent);
+}
+.messages-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.messages-search-icon {
+  position: absolute;
+  left: 12px;
+  width: 17px;
+  height: 17px;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+.messages-search-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px 0 38px;
+  border-radius: 12px;
+  border: 1px solid var(--soft-line);
+  background: var(--card);
+  font-size: 14px;
+  color: var(--foreground);
+  box-shadow: 0 2px 6px -2px var(--booking-shadow);
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.messages-search-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 18%, transparent);
+}
+.unread-indicator {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+.messages-empty {
+  padding: 48px 24px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.empty-icon-circle {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: color-mix(in oklch, var(--primary) 12%, var(--card));
+  display: grid;
+  place-items: center;
+  margin-bottom: 4px;
+  box-shadow: 0 6px 16px -6px color-mix(in oklch, var(--primary) 22%, transparent);
+}
+.empty-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+}
+.empty-desc {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--muted-foreground);
+  max-width: 320px;
+  margin: 0;
+}
