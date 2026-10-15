@@ -58,7 +58,12 @@ function ProviderList() {
             </div>
           </article>
         ))}
-        {list.length === 0 && <p className="empty">No providers match these filters yet.</p>}
+        {list.length === 0 && (
+          <div className="empty">
+            <p>No verified {category.plural.toLowerCase()} available yet in this area.</p>
+            <Link to="/" className="primary-btn mt-3 inline-block">Browse all categories</Link>
+          </div>
+        )}
       </main>
       {filtersOpen && (
         <div className="panel-backdrop" onClick={() => setFiltersOpen(false)}>

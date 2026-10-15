@@ -17,14 +17,13 @@ export const Route = createFileRoute("/profile")({
   component: ProfilePage,
 });
 
-type Panel = "settings" | "reviews" | "saved" | "help" | "about" | "privacy" | "terms" | "logout" | null;
+type Panel = "settings" | "saved" | "help" | "about" | "privacy" | "terms" | "logout" | null;
 
 function ProfilePage() {
   const { user, setUser, saved, toggleSaved, bookings, loggedIn, setLoggedIn } = useStore();
   const navigate = useNavigate();
   const [panel, setPanel] = useState<Panel>(null);
   const [draft, setDraft] = useState(user);
-  const completed = bookings.filter(b => b.status === "Completed");
 
   if (!loggedIn) return (
     <div className="mobile-app plain">
@@ -48,7 +47,6 @@ function ProfilePage() {
       <label className="field"><span>Full name</span><input className="input" value={draft.name} onChange={e => setDraft({ ...draft, name: e.target.value })} required /></label>
       <label className="field"><span>Email</span><input className="input" type="email" value={draft.email} onChange={e => setDraft({ ...draft, email: e.target.value })} required /></label>
       <button className="primary-btn">Save</button></form> },
-    reviews: { title: "My Reviews", body: completed.length ? <div className="sheet-list">{completed.map(b => { const p = getProvider(b.providerId)!; return <div key={b.id} className="sheet-row"><img src={p.photo} alt="" className="avatar-sm" width={816} height={816} /><div><strong>{p.name}</strong><Rating value={5} reviews={1} /><p className="muted">Great work on {b.service.toLowerCase()}, very professional.</p></div></div>; })}</div> : <p className="panel-copy">You haven't reviewed anyone yet.</p> },
     saved: { title: "Saved Providers", body: saved.length ? <div className="sheet-list">{saved.map(id => { const p = getProvider(id); if (!p) return null; return <div key={id} className="sheet-row"><img src={p.photo} alt="" className="avatar-sm" width={816} height={816} /><Link to="/provider/$id" params={{ id }} className="grow"><strong>{p.name}</strong><p className="muted">{p.role} • {p.area}</p></Link><button className="icon-btn heart-on" aria-label="Remove" onClick={() => toggleSaved(id)}><Heart fill="currentColor" /></button></div>; })}</div> : <p className="panel-copy">Tap the heart on a provider to save them here.</p> },
     help: { title: "Help & Support", body: <div className="faq"><details><summary>How do I book a service?</summary><p>Pick a service on Home, choose a provider and tap Book Now.</p></details><details><summary>Can I cancel a booking?</summary><p>Yes — open My Bookings and tap Cancel on any upcoming booking.</p></details><details><summary>Are providers verified?</summary><p>Providers with a green Verified badge are background checked.</p></details><a href="mailto:support@budgamservices.in" className="primary-btn">Contact Support</a></div> },
     about: { title: "About Us", body: <p className="panel-copy">Budgam Services connects you with trusted local electricians, plumbers, carpenters, mechanics and more across Budgam district.</p> },

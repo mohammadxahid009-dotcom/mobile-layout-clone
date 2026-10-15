@@ -88,13 +88,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const user = { ...initial.user, ...saved.user };
         if (saved.user?.name === "Arif Hussain") user.name = initial.user.name;
         if (saved.user?.email === "arif@gmail.com") user.email = initial.user.email;
-        // Purge legacy mock data b1, b2 and mock chats so real functionality takes over
+        // Remove known legacy sample bookings and conversations, while preserving bookings created by the user.
         const cleanBookings = (saved.bookings || []).filter((b: any) => b && b.id !== "b1" && b.id !== "b2");
         const cleanChats = { ...(saved.chats || {}) };
         if (cleanChats["sameer-electricals"] && cleanChats["sameer-electricals"].some((m: any) => m.id === "m1" || m.id === "m2")) {
           delete cleanChats["sameer-electricals"];
         }
-        setState({ ...initial, ...saved, bookings: cleanBookings, chats: cleanChats, user });
+        // Provider profiles are empty until real provider data is connected, so stale saved IDs cannot be displayed.
+        setState({ ...initial, ...saved, bookings: cleanBookings, chats: cleanChats, saved: [], user });
       }
     } catch { /* ignore */ }
     setReady(true);
@@ -117,27 +118,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
     reply: (providerId, text) => {
       setState(s => ({ ...s, chats: { ...s.chats, [providerId]: [...(s.chats[providerId] ?? []), { id: crypto.randomUUID(), from: "them", text, time: now() }] } }));
-      // Simulate responsive customer reply after 1.4s so messaging works without a backend
-      setTimeout(() => {
-        setState(s => {
-          const thread = s.chats[providerId] ?? [];
-          const replies = [
-            "Thank you for the update!",
-            "Got it, looking forward to it.",
-            "Sounds good, see you then!",
-            "Thank you! Much appreciated.",
-            "Understood, thanks for letting me know.",
-          ];
-          const autoMsg = replies[Math.floor(Math.random() * replies.length)];
-          return {
-            ...s,
-            chats: {
-              ...s.chats,
-              [providerId]: [...thread, { id: crypto.randomUUID(), from: "me", text: autoMsg, time: now() }],
-            },
-          };
-        });
-      }, 1400);
     },
     addReview: r => setState(s => ({
       ...s,

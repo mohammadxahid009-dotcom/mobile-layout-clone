@@ -26,8 +26,7 @@ function BookingsPage() {
   const [detail, setDetail] = useState<Booking | null>(null);
   const [confirm, setConfirm] = useState<Booking | null>(null);
   const list = bookings.filter(b => b.status === tabStatus[tab]);
-  const showAll = tab === "Upcoming";
-  const display = showAll ? [...list, ...bookings.filter(b => b.status === "Completed").slice(0, 1)] : list;
+  const display = list;
 
   return (
     <div className="mobile-app plain bookings-page">
@@ -35,13 +34,20 @@ function BookingsPage() {
       <div className="pill-row">{tabs.map(t => <button key={t} className={`pill ${tab === t ? "pill-active" : ""}`} onClick={() => setTab(t)}>{t}</button>)}</div>
       <main className="list-content">
         {display.map(b => {
-          const p = getProvider(b.providerId)!;
+          const p = getProvider(b.providerId);
+          const providerName = p?.name ?? "Service Professional";
           return (
             <article key={b.id} className="booking-card">
               <div className="booking-top">
-                <img src={p.photo} alt={p.name} className="avatar-md" loading="lazy" width={816} height={816} />
+                {p?.photo ? (
+                  <img src={p.photo} alt={providerName} className="avatar-md" loading="lazy" width={816} height={816} />
+                ) : (
+                  <div className="avatar-md grid place-items-center bg-primary/10 text-primary font-semibold text-base rounded-full">
+                    {providerName.slice(0, 1)}
+                  </div>
+                )}
                 <div className="booking-info">
-                  <h2>{p.name}</h2><p className="muted">{b.service}</p>
+                  <h2>{providerName}</h2><p className="muted">{b.service}</p>
                   <p className="meta sm"><CalendarDays />{b.date} • {b.time.replace(" - ", " - ")}</p>
                   <p className="meta sm"><MapPin />{b.location}</p>
                 </div>
@@ -57,26 +63,38 @@ function BookingsPage() {
       </main>
       <BottomNav active="Bookings" />
 
-      {detail && (() => { const p = getProvider(detail.providerId)!; return (
-        <div className="panel-backdrop" onClick={() => setDetail(null)}>
-          <section className="detail-panel" role="dialog" aria-modal="true" aria-label="Booking details" onClick={e => e.stopPropagation()}>
-            <div className="panel-heading"><h2>Booking Details</h2><button className="icon-btn" aria-label="Close" onClick={() => setDetail(null)}><X /></button></div>
-            <dl className="detail-list">
-              <div><dt>Provider</dt><dd>{p.name}</dd></div><div><dt>Service</dt><dd>{detail.service}</dd></div>
-              <div><dt>Date</dt><dd>{detail.date}</dd></div><div><dt>Time</dt><dd>{detail.time}</dd></div>
-              <div><dt>Location</dt><dd>{detail.location}</dd></div><div><dt>Status</dt><dd>{detail.status}</dd></div>
-              {detail.description && <div><dt>Notes</dt><dd>{detail.description}</dd></div>}
-            </dl>
-            {detail.status === "Completed" && <RateForm booking={detail} onDone={() => setDetail(null)} />}
-            <div className="btn-pair"><Link to="/chat/$id" params={{ id: p.id }} className="outline-btn">Message</Link><Link to="/provider/$id" params={{ id: p.id }} className="primary-btn">View Provider</Link></div>
-          </section>
-        </div>); })()}
+      {detail && (() => {
+        const p = getProvider(detail.providerId);
+        const providerName = p?.name ?? "Service Professional";
+        return (
+          <div className="panel-backdrop" onClick={() => setDetail(null)}>
+            <section className="detail-panel" role="dialog" aria-modal="true" aria-label="Booking details" onClick={e => e.stopPropagation()}>
+              <div className="panel-heading"><h2>Booking Details</h2><button className="icon-btn" aria-label="Close" onClick={() => setDetail(null)}><X /></button></div>
+              <dl className="detail-list">
+                <div><dt>Provider</dt><dd>{providerName}</dd></div><div><dt>Service</dt><dd>{detail.service}</dd></div>
+                <div><dt>Date</dt><dd>{detail.date}</dd></div><div><dt>Time</dt><dd>{detail.time}</dd></div>
+                <div><dt>Location</dt><dd>{detail.location}</dd></div><div><dt>Status</dt><dd>{detail.status}</dd></div>
+                {detail.description && <div><dt>Notes</dt><dd>{detail.description}</dd></div>}
+              </dl>
+              {detail.status === "Completed" && <RateForm booking={detail} onDone={() => setDetail(null)} />}
+              <div className="btn-pair">
+                <Link to="/chat/" params={{ id: detail.providerId }} className="outline-btn">Message</Link>
+                {p ? (
+                  <Link to="/provider/" params={{ id: p.id }} className="primary-btn">View Provider</Link>
+                ) : (
+                  <button className="primary-btn" onClick={() => setDetail(null)}>Close</button>
+                )}
+              </div>
+            </section>
+          </div>
+        );
+      })()}
 
       {confirm && (
         <div className="panel-backdrop" onClick={() => setConfirm(null)}>
           <section className="detail-panel" role="alertdialog" aria-modal="true" aria-label="Cancel booking" onClick={e => e.stopPropagation()}>
             <h2 className="panel-title">Cancel this booking?</h2>
-            <p className="panel-copy">{getProvider(confirm.providerId)?.name} will be notified.</p>
+            <p className="panel-copy">{getProvider(confirm.providerId)?.name || "The service professional"} will be notified.</p>
             <div className="btn-pair"><button className="outline-btn" onClick={() => setConfirm(null)}>Keep</button><button className="danger-solid" onClick={() => { setStatus(confirm.id, "Cancelled"); setConfirm(null); toast("Booking cancelled"); }}>Cancel Booking</button></div>
           </section>
         </div>
