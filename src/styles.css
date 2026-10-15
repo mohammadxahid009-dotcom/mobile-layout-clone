@@ -1421,3 +1421,205 @@ a:active > .pro-card, button:active > .pro-card { transform: translateY(1px); }
   max-width: 320px;
   margin: 0;
 }
+
+/* Choose Your Role Screen */
+.choose-role-screen {
+  background-color: var(--background);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.choose-role-container {
+  padding: 16px 22px 32px;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.illustration-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0 16px;
+  width: 100%;
+}
+
+.role-illustration {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  max-height: 220px;
+}
+
+.role-text-header {
+  margin-top: 8px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.role-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.role-subtitle {
+  font-size: 15px;
+  line-height: 1.45;
+  color: #64748B;
+  margin: 0;
+  font-weight: 400;
+}
+
+.role-cards-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.role-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 18px;
+  border-radius: 16px;
+  border: 1.5px solid #E2E8F0;
+  background-color: #FFFFFF;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.role-card:hover {
+  border-color: #CBD5E1;
+}
+
+.role-card.selected {
+  border: 2px solid #00A859;
+  background-color: #F4FBF7;
+  box-shadow: 0 4px 12px rgba(0, 168, 89, 0.08);
+}
+
+.role-card-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.customer-icon {
+  background-color: #E6F7EF;
+  color: #00A859;
+}
+
+.provider-icon {
+  background-color: #E6F7EF;
+  color: #00A859;
+}
+
+.role-card.selected .provider-icon,
+.role-card.selected .customer-icon {
+  background-color: #00A859;
+  color: #FFFFFF;
+}
+
+.role-icon {
+  width: 26px;
+  height: 26px;
+}
+
+.role-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.role-card-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0 0 4px 0;
+  line-height: 1.25;
+}
+
+.role-card.selected .role-card-title {
+  color: #00A859;
+}
+
+.role-card-desc {
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: #64748B;
+  margin: 0;
+}
+
+.role-card-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.chevron-icon {
+  width: 20px;
+  height: 20px;
+  color: #0F172A;
+}
+
+.check-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #00A859;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.check-icon {
+  width: 15px;
+  height: 15px;
+  stroke-width: 3;
+}
+
+.role-action-area {
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.continue-btn {
+  width: 100%;
+  height: 52px;
+  border-radius: 14px;
+  background-color: #00A859;
+  color: #FFFFFF;
+  font-size: 17px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  box-shadow: 0 4px 12px rgba(0, 168, 89, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.continue-btn:hover {
+  background-color: #00934E;
+}
+
+.continue-btn:active {
+  transform: scale(0.99);
+}
