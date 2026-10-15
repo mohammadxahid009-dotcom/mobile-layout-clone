@@ -1424,14 +1424,42 @@ a:active > .pro-card, button:active > .pro-card { transform: translateY(1px); }
 
 /* Choose Your Role Screen */
 .choose-role-screen {
-  background-color: var(--background);
+  position: relative;
+  background: radial-gradient(circle at 10% 0%, #D8F3E5 0%, #FAFCFB 45%, #F5FAFAF0 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.bg-corner-top-left {
+  position: absolute;
+  top: -80px;
+  left: -80px;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 230, 201, 0.6) 0%, rgba(220, 245, 232, 0.25) 50%, rgba(255, 255, 255, 0) 75%);
+  pointer-events: none;
+  filter: blur(10px);
+}
+
+.bg-corner-bottom-right {
+  position: absolute;
+  bottom: -100px;
+  right: -80px;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 230, 201, 0.65) 0%, rgba(215, 245, 230, 0.3) 50%, rgba(255, 255, 255, 0) 75%);
+  pointer-events: none;
+  filter: blur(12px);
 }
 
 .choose-role-container {
-  padding: 16px 22px 32px;
+  position: relative;
+  z-index: 1;
+  padding: 64px 22px 36px;
   display: flex;
   flex-direction: column;
   max-width: 480px;
@@ -1439,40 +1467,25 @@ a:active > .pro-card, button:active > .pro-card { transform: translateY(1px); }
   width: 100%;
 }
 
-.illustration-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 8px 0 16px;
-  width: 100%;
-}
-
-.role-illustration {
-  width: 100%;
-  max-width: 280px;
-  height: auto;
-  max-height: 220px;
-}
-
 .role-text-header {
-  margin-top: 8px;
-  margin-bottom: 24px;
+  margin-top: 12px;
+  margin-bottom: 28px;
   text-align: left;
 }
 
 .role-title {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 800;
-  color: #0F172A;
-  margin: 0 0 8px 0;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+  color: #0B192C;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
 }
 
 .role-subtitle {
-  font-size: 15px;
-  line-height: 1.45;
-  color: #64748B;
+  font-size: 15.5px;
+  line-height: 1.48;
+  color: #52616B;
   margin: 0;
   font-weight: 400;
 }
@@ -1481,7 +1494,7 @@ a:active > .pro-card, button:active > .pro-card { transform: translateY(1px); }
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .role-card {
@@ -1489,50 +1502,50 @@ a:active > .pro-card, button:active > .pro-card { transform: translateY(1px); }
   align-items: center;
   gap: 16px;
   padding: 18px 18px;
-  border-radius: 16px;
-  border: 1.5px solid #E2E8F0;
-  background-color: #FFFFFF;
+  border-radius: 18px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
   text-align: left;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   width: 100%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
 }
 
 .role-card:hover {
   border-color: #CBD5E1;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
 }
 
 .role-card.selected {
-  border: 2px solid #00A859;
-  background-color: #F4FBF7;
-  box-shadow: 0 4px 12px rgba(0, 168, 89, 0.08);
+  border: 1.5px solid #009652;
+  background: linear-gradient(135deg, #EFFBF5 0%, #E3F8EE 100%);
+  box-shadow: 0 8px 24px rgba(0, 150, 82, 0.12), 0 2px 6px rgba(0, 150, 82, 0.06);
 }
 
 .role-card-icon-wrap {
-  width: 52px;
-  height: 52px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
-.customer-icon {
-  background-color: #E6F7EF;
-  color: #00A859;
-}
-
+.customer-icon,
 .provider-icon {
-  background-color: #E6F7EF;
-  color: #00A859;
+  background: #D8F3E5;
+  color: #009652;
 }
 
 .role-card.selected .provider-icon,
 .role-card.selected .customer-icon {
-  background-color: #00A859;
+  background: #009652;
   color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(0, 150, 82, 0.25);
 }
 
 .role-icon {
@@ -1546,21 +1559,21 @@ a:active > .pro-card, button:active > .pro-card { transform: translateY(1px); }
 }
 
 .role-card-title {
-  font-size: 17px;
-  font-weight: 700;
-  color: #0F172A;
+  font-size: 17.5px;
+  font-weight: 750;
+  color: #0B192C;
   margin: 0 0 4px 0;
   line-height: 1.25;
 }
 
 .role-card.selected .role-card-title {
-  color: #00A859;
+  color: #008749;
 }
 
 .role-card-desc {
   font-size: 13.5px;
-  line-height: 1.4;
-  color: #64748B;
+  line-height: 1.42;
+  color: #52616B;
   margin: 0;
 }
 
@@ -1574,18 +1587,19 @@ a:active > .pro-card, button:active > .pro-card { transform: translateY(1px); }
 .chevron-icon {
   width: 20px;
   height: 20px;
-  color: #0F172A;
+  color: #0B192C;
 }
 
 .check-badge {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background-color: #00A859;
+  background-color: #009652;
   color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 150, 82, 0.3);
 }
 
 .check-icon {
@@ -1596,30 +1610,31 @@ a:active > .pro-card, button:active > .pro-card { transform: translateY(1px); }
 
 .role-action-area {
   margin-top: auto;
-  padding-top: 12px;
+  padding-top: 16px;
 }
 
 .continue-btn {
   width: 100%;
   height: 52px;
-  border-radius: 14px;
-  background-color: #00A859;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #00A057 0%, #008246 100%);
   color: #FFFFFF;
   font-size: 17px;
-  font-weight: 700;
+  font-weight: 750;
   border: none;
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.1s ease;
-  box-shadow: 0 4px 12px rgba(0, 168, 89, 0.25);
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 22px rgba(0, 150, 82, 0.28), 0 2px 6px rgba(0, 150, 82, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .continue-btn:hover {
-  background-color: #00934E;
+  background: linear-gradient(135deg, #008F4E 0%, #00733E 100%);
+  box-shadow: 0 10px 26px rgba(0, 150, 82, 0.34);
 }
 
 .continue-btn:active {
-  transform: scale(0.99);
+  transform: scale(0.985);
 }
