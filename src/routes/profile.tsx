@@ -34,6 +34,7 @@ function ProfilePage() {
   );
 
   const items: { label: string; icon: typeof Star; tint: string; action: () => void }[] = [
+    { label: "Switch to Service Provider", icon: ShieldCheck, tint: "tint-green", action: () => navigate({ to: "/pro" }) },
     { label: "My Bookings", icon: ClipboardList, tint: "tint-green", action: () => navigate({ to: "/bookings" }) },
     { label: "My Reviews", icon: Star, tint: "tint-amber", action: () => setPanel("reviews") },
     { label: "Saved Providers", icon: Heart, tint: "tint-pink", action: () => setPanel("saved") },
@@ -85,3 +86,4 @@ function ProfilePage() {
     </div>
   );
 }
+

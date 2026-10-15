@@ -67,6 +67,7 @@ function BookingsPage() {
               <div><dt>Location</dt><dd>{detail.location}</dd></div><div><dt>Status</dt><dd>{detail.status}</dd></div>
               {detail.description && <div><dt>Notes</dt><dd>{detail.description}</dd></div>}
             </dl>
+            {detail.status === "Completed" && <RateForm booking={detail} onDone={() => setDetail(null)} />}
             <div className="btn-pair"><Link to="/chat/$id" params={{ id: p.id }} className="outline-btn">Message</Link><Link to="/provider/$id" params={{ id: p.id }} className="primary-btn">View Provider</Link></div>
           </section>
         </div>); })()}
@@ -81,5 +82,21 @@ function BookingsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+
+function RateForm({ booking, onDone }: { booking: Booking; onDone: () => void }) {
+  const { addReview, reviews, user } = useStore();
+  const existing = reviews.find(r => r.bookingId === booking.id);
+  const [rating, setRating] = useState(existing?.rating ?? 5);
+  const [text, setText] = useState(existing?.text ?? "");
+  return (
+    <form className="sheet-form" onSubmit={e => { e.preventDefault(); addReview({ bookingId: booking.id, providerId: booking.providerId, service: booking.service, rating, text, author: user.name }); toast.success("Thanks for your review"); onDone(); }}>
+      <p className="muted">{existing ? "Update your review" : "Rate this service"}</p>
+      <div style={{ display: "flex", gap: 6 }}>{[1, 2, 3, 4, 5].map(n => <button type="button" key={n} aria-label={`${n} stars`} onClick={() => setRating(n)} style={{ fontSize: 24, color: n <= rating ? "var(--electrician-ink)" : "var(--border)" }}>★</button>)}</div>
+      <textarea className="input" rows={2} value={text} onChange={e => setText(e.target.value)} placeholder="How was the service?" />
+      <button className="primary-btn" type="submit">Submit Review</button>
+    </form>
   );
 }

@@ -12,11 +12,23 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as ProRouteImport } from './routes/pro'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as BookIdRouteImport } from './routes/book.$id'
 import { Route as ChatIdRouteImport } from './routes/chat.$id'
+import { Route as ProIndexRouteImport } from './routes/pro.index'
+import { Route as ProBookingsRouteImport } from './routes/pro.bookings'
+import { Route as ProEarningsRouteImport } from './routes/pro.earnings'
+import { Route as ProHelpRouteImport } from './routes/pro.help'
+import { Route as ProMessagesRouteImport } from './routes/pro.messages'
+import { Route as ProProfileRouteImport } from './routes/pro.profile'
+import { Route as ProReviewsRouteImport } from './routes/pro.reviews'
+import { Route as ProScheduleRouteImport } from './routes/pro.schedule'
+import { Route as ProServicesRouteImport } from './routes/pro.services'
 import { Route as ProviderIdRouteImport } from './routes/provider.$id'
 import { Route as ServicesCategoryRouteImport } from './routes/services.$category'
+import { Route as ProBookingIdRouteImport } from './routes/pro.booking.$id'
+import { Route as ProChatIdRouteImport } from './routes/pro.chat.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -31,6 +43,11 @@ const BookingsRoute = BookingsRouteImport.update({
 const MessagesRoute = MessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProRoute = ProRouteImport.update({
+  id: '/pro',
+  path: '/pro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -48,6 +65,51 @@ const ChatIdRoute = ChatIdRouteImport.update({
   path: '/chat/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProIndexRoute = ProIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProRoute,
+} as any)
+const ProBookingsRoute = ProBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => ProRoute,
+} as any)
+const ProEarningsRoute = ProEarningsRouteImport.update({
+  id: '/earnings',
+  path: '/earnings',
+  getParentRoute: () => ProRoute,
+} as any)
+const ProHelpRoute = ProHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => ProRoute,
+} as any)
+const ProMessagesRoute = ProMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => ProRoute,
+} as any)
+const ProProfileRoute = ProProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => ProRoute,
+} as any)
+const ProReviewsRoute = ProReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => ProRoute,
+} as any)
+const ProScheduleRoute = ProScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
+  getParentRoute: () => ProRoute,
+} as any)
+const ProServicesRoute = ProServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => ProRoute,
+} as any)
 const ProviderIdRoute = ProviderIdRouteImport.update({
   id: '/provider/$id',
   path: '/provider/$id',
@@ -58,16 +120,38 @@ const ServicesCategoryRoute = ServicesCategoryRouteImport.update({
   path: '/services/$category',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProBookingIdRoute = ProBookingIdRouteImport.update({
+  id: '/booking/$id',
+  path: '/booking/$id',
+  getParentRoute: () => ProRoute,
+} as any)
+const ProChatIdRoute = ProChatIdRouteImport.update({
+  id: '/chat/$id',
+  path: '/chat/$id',
+  getParentRoute: () => ProRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bookings': typeof BookingsRoute
   '/messages': typeof MessagesRoute
+  '/pro': typeof ProRouteWithChildren
   '/profile': typeof ProfileRoute
   '/book/$id': typeof BookIdRoute
   '/chat/$id': typeof ChatIdRoute
+  '/pro/bookings': typeof ProBookingsRoute
+  '/pro/earnings': typeof ProEarningsRoute
+  '/pro/help': typeof ProHelpRoute
+  '/pro/messages': typeof ProMessagesRoute
+  '/pro/profile': typeof ProProfileRoute
+  '/pro/reviews': typeof ProReviewsRoute
+  '/pro/schedule': typeof ProScheduleRoute
+  '/pro/services': typeof ProServicesRoute
   '/provider/$id': typeof ProviderIdRoute
   '/services/$category': typeof ServicesCategoryRoute
+  '/pro/': typeof ProIndexRoute
+  '/pro/booking/$id': typeof ProBookingIdRoute
+  '/pro/chat/$id': typeof ProChatIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -76,19 +160,42 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/book/$id': typeof BookIdRoute
   '/chat/$id': typeof ChatIdRoute
+  '/pro/bookings': typeof ProBookingsRoute
+  '/pro/earnings': typeof ProEarningsRoute
+  '/pro/help': typeof ProHelpRoute
+  '/pro/messages': typeof ProMessagesRoute
+  '/pro/profile': typeof ProProfileRoute
+  '/pro/reviews': typeof ProReviewsRoute
+  '/pro/schedule': typeof ProScheduleRoute
+  '/pro/services': typeof ProServicesRoute
   '/provider/$id': typeof ProviderIdRoute
   '/services/$category': typeof ServicesCategoryRoute
+  '/pro': typeof ProIndexRoute
+  '/pro/booking/$id': typeof ProBookingIdRoute
+  '/pro/chat/$id': typeof ProChatIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/bookings': typeof BookingsRoute
   '/messages': typeof MessagesRoute
+  '/pro': typeof ProRouteWithChildren
   '/profile': typeof ProfileRoute
   '/book/$id': typeof BookIdRoute
   '/chat/$id': typeof ChatIdRoute
+  '/pro/bookings': typeof ProBookingsRoute
+  '/pro/earnings': typeof ProEarningsRoute
+  '/pro/help': typeof ProHelpRoute
+  '/pro/messages': typeof ProMessagesRoute
+  '/pro/profile': typeof ProProfileRoute
+  '/pro/reviews': typeof ProReviewsRoute
+  '/pro/schedule': typeof ProScheduleRoute
+  '/pro/services': typeof ProServicesRoute
   '/provider/$id': typeof ProviderIdRoute
   '/services/$category': typeof ServicesCategoryRoute
+  '/pro/': typeof ProIndexRoute
+  '/pro/booking/$id': typeof ProBookingIdRoute
+  '/pro/chat/$id': typeof ProChatIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -96,11 +203,23 @@ export interface FileRouteTypes {
     | '/'
     | '/bookings'
     | '/messages'
+    | '/pro'
     | '/profile'
     | '/book/$id'
     | '/chat/$id'
+    | '/pro/bookings'
+    | '/pro/earnings'
+    | '/pro/help'
+    | '/pro/messages'
+    | '/pro/profile'
+    | '/pro/reviews'
+    | '/pro/schedule'
+    | '/pro/services'
     | '/provider/$id'
     | '/services/$category'
+    | '/pro/'
+    | '/pro/booking/$id'
+    | '/pro/chat/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -109,24 +228,48 @@ export interface FileRouteTypes {
     | '/profile'
     | '/book/$id'
     | '/chat/$id'
+    | '/pro/bookings'
+    | '/pro/earnings'
+    | '/pro/help'
+    | '/pro/messages'
+    | '/pro/profile'
+    | '/pro/reviews'
+    | '/pro/schedule'
+    | '/pro/services'
     | '/provider/$id'
     | '/services/$category'
+    | '/pro'
+    | '/pro/booking/$id'
+    | '/pro/chat/$id'
   id:
     | '__root__'
     | '/'
     | '/bookings'
     | '/messages'
+    | '/pro'
     | '/profile'
     | '/book/$id'
     | '/chat/$id'
+    | '/pro/bookings'
+    | '/pro/earnings'
+    | '/pro/help'
+    | '/pro/messages'
+    | '/pro/profile'
+    | '/pro/reviews'
+    | '/pro/schedule'
+    | '/pro/services'
     | '/provider/$id'
     | '/services/$category'
+    | '/pro/'
+    | '/pro/booking/$id'
+    | '/pro/chat/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BookingsRoute: typeof BookingsRoute
   MessagesRoute: typeof MessagesRoute
+  ProRoute: typeof ProRouteWithChildren
   ProfileRoute: typeof ProfileRoute
   BookIdRoute: typeof BookIdRoute
   ChatIdRoute: typeof ChatIdRoute
@@ -157,6 +300,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pro': {
+      id: '/pro'
+      path: '/pro'
+      fullPath: '/pro'
+      preLoaderRoute: typeof ProRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -178,6 +328,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pro/': {
+      id: '/pro/'
+      path: '/'
+      fullPath: '/pro/'
+      preLoaderRoute: typeof ProIndexRouteImport
+      parentRoute: typeof ProRoute
+    }
+    '/pro/bookings': {
+      id: '/pro/bookings'
+      path: '/bookings'
+      fullPath: '/pro/bookings'
+      preLoaderRoute: typeof ProBookingsRouteImport
+      parentRoute: typeof ProRoute
+    }
+    '/pro/earnings': {
+      id: '/pro/earnings'
+      path: '/earnings'
+      fullPath: '/pro/earnings'
+      preLoaderRoute: typeof ProEarningsRouteImport
+      parentRoute: typeof ProRoute
+    }
+    '/pro/help': {
+      id: '/pro/help'
+      path: '/help'
+      fullPath: '/pro/help'
+      preLoaderRoute: typeof ProHelpRouteImport
+      parentRoute: typeof ProRoute
+    }
+    '/pro/messages': {
+      id: '/pro/messages'
+      path: '/messages'
+      fullPath: '/pro/messages'
+      preLoaderRoute: typeof ProMessagesRouteImport
+      parentRoute: typeof ProRoute
+    }
+    '/pro/profile': {
+      id: '/pro/profile'
+      path: '/profile'
+      fullPath: '/pro/profile'
+      preLoaderRoute: typeof ProProfileRouteImport
+      parentRoute: typeof ProRoute
+    }
+    '/pro/reviews': {
+      id: '/pro/reviews'
+      path: '/reviews'
+      fullPath: '/pro/reviews'
+      preLoaderRoute: typeof ProReviewsRouteImport
+      parentRoute: typeof ProRoute
+    }
+    '/pro/schedule': {
+      id: '/pro/schedule'
+      path: '/schedule'
+      fullPath: '/pro/schedule'
+      preLoaderRoute: typeof ProScheduleRouteImport
+      parentRoute: typeof ProRoute
+    }
+    '/pro/services': {
+      id: '/pro/services'
+      path: '/services'
+      fullPath: '/pro/services'
+      preLoaderRoute: typeof ProServicesRouteImport
+      parentRoute: typeof ProRoute
+    }
     '/provider/$id': {
       id: '/provider/$id'
       path: '/provider/$id'
@@ -192,13 +405,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesCategoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pro/booking/$id': {
+      id: '/pro/booking/$id'
+      path: '/booking/$id'
+      fullPath: '/pro/booking/$id'
+      preLoaderRoute: typeof ProBookingIdRouteImport
+      parentRoute: typeof ProRoute
+    }
+    '/pro/chat/$id': {
+      id: '/pro/chat/$id'
+      path: '/chat/$id'
+      fullPath: '/pro/chat/$id'
+      preLoaderRoute: typeof ProChatIdRouteImport
+      parentRoute: typeof ProRoute
+    }
   }
 }
+
+interface ProRouteChildren {
+  ProBookingsRoute: typeof ProBookingsRoute
+  ProEarningsRoute: typeof ProEarningsRoute
+  ProHelpRoute: typeof ProHelpRoute
+  ProMessagesRoute: typeof ProMessagesRoute
+  ProProfileRoute: typeof ProProfileRoute
+  ProReviewsRoute: typeof ProReviewsRoute
+  ProScheduleRoute: typeof ProScheduleRoute
+  ProServicesRoute: typeof ProServicesRoute
+  ProIndexRoute: typeof ProIndexRoute
+  ProBookingIdRoute: typeof ProBookingIdRoute
+  ProChatIdRoute: typeof ProChatIdRoute
+}
+
+const ProRouteChildren: ProRouteChildren = {
+  ProBookingsRoute: ProBookingsRoute,
+  ProEarningsRoute: ProEarningsRoute,
+  ProHelpRoute: ProHelpRoute,
+  ProMessagesRoute: ProMessagesRoute,
+  ProProfileRoute: ProProfileRoute,
+  ProReviewsRoute: ProReviewsRoute,
+  ProScheduleRoute: ProScheduleRoute,
+  ProServicesRoute: ProServicesRoute,
+  ProIndexRoute: ProIndexRoute,
+  ProBookingIdRoute: ProBookingIdRoute,
+  ProChatIdRoute: ProChatIdRoute,
+}
+
+const ProRouteWithChildren = ProRoute._addFileChildren(ProRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BookingsRoute: BookingsRoute,
   MessagesRoute: MessagesRoute,
+  ProRoute: ProRouteWithChildren,
   ProfileRoute: ProfileRoute,
   BookIdRoute: BookIdRoute,
   ChatIdRoute: ChatIdRoute,

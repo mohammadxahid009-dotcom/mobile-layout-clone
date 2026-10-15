@@ -39,3 +39,4 @@ export const providers: Provider[] = [
 
 export const getProvider = (id: string) => providers.find(p => p.id === id);
 export const getCategory = (slug: string) => categories.find(c => c.slug === slug);
+

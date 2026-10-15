@@ -2,9 +2,11 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 
 export type Booking = { id: string; providerId: string; service: string; date: string; time: string; location: string; description: string; status: "Pending" | "Completed" | "Cancelled" };
 export type Message = { id: string; from: "me" | "them"; text: string; time: string };
-type State = { bookings: Booking[]; chats: Record<string, Message[]>; saved: string[]; user: { name: string; email: string }; loggedIn: boolean };
+export type Review = { id: string; bookingId: string; providerId: string; service: string; rating: number; text: string; author: string; date: string };
+type State = { reviews: Review[]; bookings: Booking[]; chats: Record<string, Message[]>; saved: string[]; user: { name: string; email: string }; loggedIn: boolean };
 
 const initial: State = {
+  reviews: [],
   bookings: [
     { id: "b1", providerId: "sameer-electricals", service: "House Wiring", date: "Tomorrow, 10 Apr", time: "10:00 AM - 12:00 PM", location: "Chadoora, Budgam", description: "Need to fix wiring for kitchen and install one ceiling light.", status: "Pending" },
     { id: "b2", providerId: "bilal-electric-works", service: "AC Repair", date: "8 Apr 2025", time: "2:00 PM - 4:00 PM", location: "Budgam", description: "", status: "Completed" },
@@ -25,6 +27,8 @@ type Ctx = State & {
   addBooking: (b: Omit<Booking, "id" | "status">) => void;
   setStatus: (id: string, status: Booking["status"]) => void;
   send: (providerId: string, text: string) => void;
+  reply: (providerId: string, text: string) => void;
+  addReview: (r: Omit<Review, "id" | "date">) => void;
   toggleSaved: (id: string) => void;
   setUser: (u: State["user"]) => void;
   setLoggedIn: (v: boolean) => void;
@@ -95,6 +99,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setState(s => ({ ...s, chats: { ...s.chats, [providerId]: [...(s.chats[providerId] ?? []), { id: crypto.randomUUID(), from: "me", text, time: now() }] } }));
       setTimeout(() => setState(s => ({ ...s, chats: { ...s.chats, [providerId]: [...(s.chats[providerId] ?? []), { id: crypto.randomUUID(), from: "them", text: "Thanks for your message! I'll get back to you shortly.", time: now() }] } })), 1500);
     },
+    reply: (providerId, text) => setState(s => ({ ...s, chats: { ...s.chats, [providerId]: [...(s.chats[providerId] ?? []), { id: crypto.randomUUID(), from: "them", text, time: now() }] } })),
+    addReview: r => setState(s => ({ ...s, reviews: [{ ...r, id: crypto.randomUUID(), date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) }, ...s.reviews.filter(x => x.bookingId !== r.bookingId)] })),
     toggleSaved: id => setState(s => ({ ...s, saved: s.saved.includes(id) ? s.saved.filter(x => x !== id) : [...s.saved, id] })),
     setUser: user => setState(s => ({ ...s, user })),
     setLoggedIn: loggedIn => setState(s => ({ ...s, loggedIn })),
@@ -114,3 +120,4 @@ export function useStore() {
   if (!ctx) throw new Error("useStore must be inside StoreProvider");
   return ctx;
 }
+

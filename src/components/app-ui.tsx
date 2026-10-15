@@ -143,3 +143,4 @@ export function Rating({ value, reviews }: { value: number; reviews: number }) {
 export function Verified({ label = "Verified" }: { label?: string }) {
   return <span className="chip-verified"><BadgeCheck fill="currentColor" />{label}</span>;
 }
+

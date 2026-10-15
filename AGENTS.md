@@ -8,7 +8,4 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
-
-- Keep the mobile service home at `/`, with its presentation in global semantic CSS and local transient interaction state; this preserves the reference layout without implying connected booking services.
-- Declare phone edge-to-edge support in the root head and a web app manifest, with safe-area spacing in global CSS; this lets supported home-screen launches expand without placing controls under device cutouts.
-- Declare a screen's cutout clearance in a media query written after that screen's own style block, since a later equal-specificity rule wins; this keeps top content clear of phone notches and cameras.
+- Service provider screens live under /pro (layout src/routes/pro.tsx with its own store in src/lib/pro-store.tsx); jobs are derived from the shared customer bookings so both sides stay in sync.
