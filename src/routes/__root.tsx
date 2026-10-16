@@ -149,13 +149,21 @@ function GlobalAuthGate() {
       setCurrentUser(stored);
     }
 
-    // Keep active session in sync with Firebase Auth
+    // Keep active session in sync with Firebase Auth and instantaneous app-wide events
     const unsubscribe = initAuthListener((fbUser) => {
       setCurrentUser(fbUser);
     });
 
+    const handleCustomAuthChange = (e: any) => {
+      setCurrentUser(e.detail || null);
+    };
+    window.addEventListener("budgam_auth_change", handleCustomAuthChange);
+
     setReady(true);
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      window.removeEventListener("budgam_auth_change", handleCustomAuthChange);
+    };
   }, []);
 
   // SSR or before mount: if stored user is present, render outlet

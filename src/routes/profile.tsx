@@ -74,7 +74,11 @@ function ProfilePage() {
   }, []);
 
   const handleLogout = async () => {
-    await logOutUser();
+    try {
+      await logOutUser();
+    } catch (err) {
+      console.warn("Logout error:", err);
+    }
     setLoggedIn(false);
     setPanel(null);
     toast.success("Logged out successfully");

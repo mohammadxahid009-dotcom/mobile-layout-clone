@@ -42,7 +42,7 @@ type SheetPanel = "settings" | "about" | "privacy" | "terms" | "logout" | null;
 
 function Profile() {
   const { profile, setProfile, jobs } = usePro();
-  const { reviews } = useStore();
+  const { reviews, setLoggedIn } = useStore();
   const navigate = useNavigate();
 
   const [panel, setPanel] = useState<SheetPanel>(null);
@@ -63,7 +63,12 @@ function Profile() {
   }, []);
 
   const handleLogout = async () => {
-    await logOutUser();
+    try {
+      await logOutUser();
+    } catch (err) {
+      console.warn("Logout error:", err);
+    }
+    setLoggedIn(false);
     setPanel(null);
     toast.success("Logged out successfully");
     navigate({ to: "/" });
