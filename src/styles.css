@@ -2080,6 +2080,39 @@ a:active > .pro-card, button:active > .pro-card { transform: translateY(1px); }
   }
 }
 
+
+/* auth slide-up sheet (matching reference styles.css) */
+.auth-sheet-stage {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+.auth-slide-sheet {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  overflow-y: auto;
+  box-shadow: 0 -10px 30px rgba(4, 135, 77, 0.08);
+  will-change: transform;
+  animation: sheetUp 1.1s cubic-bezier(0.45, 0, 0.2, 1) 0.08s both;
+}
+
+@keyframes sheetUp {
+  from {
+    transform: translate3d(0, 100%, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-slide-sheet {
+    animation: none !important;
+  }
+}
+
 @keyframes authSlideRight {
   from {
     opacity: 0;
@@ -2144,13 +2177,29 @@ a:active > .pro-card, button:active > .pro-card { transform: translateY(1px); }
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  animation: authBackBtnIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+@keyframes authBackBtnIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .auth-circular-back-btn:hover {
   background-color: #C9EED9;
-  transform: translateX(-1px);
+  transform: translateX(-1px) scale(1.04);
+}
+
+.auth-circular-back-btn:active {
+  transform: scale(0.96);
 }
 
 .auth-header-text-block {
@@ -2418,13 +2467,17 @@ a:active > .pro-card, button:active > .pro-card { transform: translateY(1px); }
   gap: 14px;
   text-align: left;
   cursor: pointer;
-  transition: all 0.22s ease;
+  transition: border-color 0.45s ease, box-shadow 0.45s ease, transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.45s ease;
   width: 100%;
+}
+
+.role-option-box:active {
+  transform: scale(0.985);
 }
 
 .role-option-box.selected {
   border: 2px solid #099759;
-  box-shadow: 0 8px 24px rgba(9, 151, 89, 0.16);
+  box-shadow: 0 10px 26px rgba(9, 151, 89, 0.18);
   background: #FFFFFF;
 }
 
@@ -2486,6 +2539,18 @@ a:active > .pro-card, button:active > .pro-card { transform: translateY(1px); }
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: checkBadgePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes checkBadgePop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .auth-details-section {

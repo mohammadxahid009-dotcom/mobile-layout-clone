@@ -177,9 +177,9 @@ export function AuthFlow({
   return (
     <div className="auth-flow-wrapper">
       {(step === "login" || step === "signup_auth") && (
-        <div key={step} className="auth-screen-container auth-fade-in">
+        <div key={step} className={`auth-screen-container ${step === "signup_auth" ? "auth-sheet-stage auth-fade-in" : "auth-fade-in"}`}>
           <Header showBack={step === "signup_auth"} />
-          <main className="auth-white-sheet">
+          <main className={`auth-white-sheet ${step === "signup_auth" ? "auth-slide-sheet" : ""}`}>
             <div className="auth-sheet-content">
               <h2 className="auth-sheet-title">{step === "login" ? "Log In" : "Sign Up"}</h2>
               <p className="auth-sheet-subtitle">
