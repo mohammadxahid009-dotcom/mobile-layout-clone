@@ -78,9 +78,9 @@ function BookingsPage() {
               </dl>
               {detail.status === "Completed" && <RateForm booking={detail} onDone={() => setDetail(null)} />}
               <div className="btn-pair">
-                <Link to="/chat/" params={{ id: detail.providerId }} className="outline-btn">Message</Link>
+                <Link to="/chat/$id" params={{ id: detail.providerId }} className="outline-btn">Message</Link>
                 {p ? (
-                  <Link to="/provider/" params={{ id: p.id }} className="primary-btn">View Provider</Link>
+                  <Link to="/provider/$id" params={{ id: p.id }} className="primary-btn">View Provider</Link>
                 ) : (
                   <button className="primary-btn" onClick={() => setDetail(null)}>Close</button>
                 )}

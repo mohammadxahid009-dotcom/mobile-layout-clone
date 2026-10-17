@@ -71,7 +71,7 @@ function Profile() {
     setLoggedIn(false);
     setPanel(null);
     toast.success("Logged out successfully");
-    navigate({ to: "/" });
+    navigate({ to: "/welcome" });
   };
 
   const displayName = authUser?.displayName || profile.name || "Haroon Rashid";

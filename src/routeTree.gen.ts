@@ -11,10 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BookingsRouteImport } from './routes/bookings'
-import { Route as ChooseRoleRouteImport } from './routes/choose-role'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as ProRouteImport } from './routes/pro'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as RoleRouteImport } from './routes/role'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as BookIdRouteImport } from './routes/book.$id'
 import { Route as ChatIdRouteImport } from './routes/chat.$id'
 import { Route as ProIndexRouteImport } from './routes/pro.index'
@@ -41,11 +42,6 @@ const BookingsRoute = BookingsRouteImport.update({
   path: '/bookings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChooseRoleRoute = ChooseRoleRouteImport.update({
-  id: '/choose-role',
-  path: '/choose-role',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MessagesRoute = MessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
@@ -59,6 +55,16 @@ const ProRoute = ProRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RoleRoute = RoleRouteImport.update({
+  id: '/role',
+  path: '/role',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookIdRoute = BookIdRouteImport.update({
@@ -140,10 +146,11 @@ const ProChatIdRoute = ProChatIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bookings': typeof BookingsRoute
-  '/choose-role': typeof ChooseRoleRoute
   '/messages': typeof MessagesRoute
   '/pro': typeof ProRouteWithChildren
   '/profile': typeof ProfileRoute
+  '/role': typeof RoleRoute
+  '/welcome': typeof WelcomeRoute
   '/book/$id': typeof BookIdRoute
   '/chat/$id': typeof ChatIdRoute
   '/pro/bookings': typeof ProBookingsRoute
@@ -163,9 +170,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bookings': typeof BookingsRoute
-  '/choose-role': typeof ChooseRoleRoute
   '/messages': typeof MessagesRoute
   '/profile': typeof ProfileRoute
+  '/role': typeof RoleRoute
+  '/welcome': typeof WelcomeRoute
   '/book/$id': typeof BookIdRoute
   '/chat/$id': typeof ChatIdRoute
   '/pro/bookings': typeof ProBookingsRoute
@@ -186,10 +194,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/bookings': typeof BookingsRoute
-  '/choose-role': typeof ChooseRoleRoute
   '/messages': typeof MessagesRoute
   '/pro': typeof ProRouteWithChildren
   '/profile': typeof ProfileRoute
+  '/role': typeof RoleRoute
+  '/welcome': typeof WelcomeRoute
   '/book/$id': typeof BookIdRoute
   '/chat/$id': typeof ChatIdRoute
   '/pro/bookings': typeof ProBookingsRoute
@@ -211,10 +220,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/bookings'
-    | '/choose-role'
     | '/messages'
     | '/pro'
     | '/profile'
+    | '/role'
+    | '/welcome'
     | '/book/$id'
     | '/chat/$id'
     | '/pro/bookings'
@@ -234,9 +244,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/bookings'
-    | '/choose-role'
     | '/messages'
     | '/profile'
+    | '/role'
+    | '/welcome'
     | '/book/$id'
     | '/chat/$id'
     | '/pro/bookings'
@@ -256,10 +267,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/bookings'
-    | '/choose-role'
     | '/messages'
     | '/pro'
     | '/profile'
+    | '/role'
+    | '/welcome'
     | '/book/$id'
     | '/chat/$id'
     | '/pro/bookings'
@@ -280,10 +292,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BookingsRoute: typeof BookingsRoute
-  ChooseRoleRoute: typeof ChooseRoleRoute
   MessagesRoute: typeof MessagesRoute
   ProRoute: typeof ProRouteWithChildren
   ProfileRoute: typeof ProfileRoute
+  RoleRoute: typeof RoleRoute
+  WelcomeRoute: typeof WelcomeRoute
   BookIdRoute: typeof BookIdRoute
   ChatIdRoute: typeof ChatIdRoute
   ProviderIdRoute: typeof ProviderIdRoute
@@ -306,13 +319,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookingsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/choose-role': {
-      id: '/choose-role'
-      path: '/choose-role'
-      fullPath: '/choose-role'
-      preLoaderRoute: typeof ChooseRoleRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/messages': {
       id: '/messages'
       path: '/messages'
@@ -332,6 +338,20 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/role': {
+      id: '/role'
+      path: '/role'
+      fullPath: '/role'
+      preLoaderRoute: typeof RoleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/book/$id': {
@@ -475,10 +495,11 @@ const ProRouteWithChildren = ProRoute._addFileChildren(ProRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BookingsRoute: BookingsRoute,
-  ChooseRoleRoute: ChooseRoleRoute,
   MessagesRoute: MessagesRoute,
   ProRoute: ProRouteWithChildren,
   ProfileRoute: ProfileRoute,
+  RoleRoute: RoleRoute,
+  WelcomeRoute: WelcomeRoute,
   BookIdRoute: BookIdRoute,
   ChatIdRoute: ChatIdRoute,
   ProviderIdRoute: ProviderIdRoute,

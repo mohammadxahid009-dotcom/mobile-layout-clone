@@ -60,9 +60,19 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-mint: var(--mint);
+  --color-mint-deep: var(--mint-deep);
+  --color-mint-ink: var(--mint-ink);
+  --color-mint-soft: var(--mint-soft);
+  --color-sheet: var(--sheet);
 }
 
 :root {
+  --mint: oklch(0.95 0.035 160);
+  --mint-soft: oklch(0.97 0.02 160);
+  --mint-deep: oklch(0.6 0.15 155);
+  --mint-ink: oklch(0.3 0.06 165);
+  --sheet: oklch(0.99 0.006 160);
   --radius: 0.5rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.16 0.018 265);
@@ -99,6 +109,11 @@
 }
 
 :root {
+  --mint: oklch(0.95 0.035 160);
+  --mint-soft: oklch(0.97 0.02 160);
+  --mint-deep: oklch(0.6 0.15 155);
+  --mint-ink: oklch(0.3 0.06 165);
+  --sheet: oklch(0.99 0.006 160);
   --hero-foreground: oklch(1 0 0);
   --hero-shade: oklch(0.15 0.03 180 / 24%);
   --app-surround: oklch(0.96 0.006 230);
@@ -192,6 +207,11 @@ body::-webkit-scrollbar { width: 0; height: 0; display: none; }
 .verified-strip small { font-size: 13px; line-height: 16px; color: var(--subtle-text); font-weight: 400; }
 .verified-strip .verified-arrow { width: 22px; height: 22px; margin-left: auto; color: var(--primary); stroke-width: 1.7; }
 :root {
+  --mint: oklch(0.95 0.035 160);
+  --mint-soft: oklch(0.97 0.02 160);
+  --mint-deep: oklch(0.6 0.15 155);
+  --mint-ink: oklch(0.3 0.06 165);
+  --sheet: oklch(0.99 0.006 160);
   --nav-surface: linear-gradient(180deg, var(--card), color-mix(in oklab, var(--secondary) 30%, var(--card)));
   --nav-border: color-mix(in oklab, var(--border) 65%, var(--card));
   --nav-shadow: oklch(0.36 0.035 250 / 16%);
@@ -226,7 +246,12 @@ body::-webkit-scrollbar { width: 0; height: 0; display: none; }
 @media (max-width: 360px) { .header-content,.home-content { padding-left: 14px; padding-right: 14px; } .service-grid { gap: 12px 8px; } .service-name { font-size: 12px; } .search-field { gap: 9px; padding: 0 12px; } .search-field input { font-size: 14px; } .verified-strip { gap: 9px; padding-left: 12px; padding-right: 10px; } .verified-strip strong { font-size: 14px; } .verified-strip small { font-size: 12px; } .greeting p { font-size: 17px; } }
 
 /* ---- shared app screens ---- */
-:root { --soft-line: oklch(0.94 0.008 250); --bubble-me: oklch(0.93 0.06 150); --bubble-them: oklch(0.96 0.004 250); --rating: oklch(0.8 0.16 80); --available-surface: oklch(0.96 0.04 150); --pending-surface: oklch(0.96 0.06 85); --pending-ink: oklch(0.62 0.14 65); --danger-surface: oklch(0.97 0.02 20); --tick: oklch(0.62 0.15 240); }
+:root {
+  --mint: oklch(0.95 0.035 160);
+  --mint-soft: oklch(0.97 0.02 160);
+  --mint-deep: oklch(0.6 0.15 155);
+  --mint-ink: oklch(0.3 0.06 165);
+  --sheet: oklch(0.99 0.006 160); --soft-line: oklch(0.94 0.008 250); --bubble-me: oklch(0.93 0.06 150); --bubble-them: oklch(0.96 0.004 250); --rating: oklch(0.8 0.16 80); --available-surface: oklch(0.96 0.04 150); --pending-surface: oklch(0.96 0.06 85); --pending-ink: oklch(0.62 0.14 65); --danger-surface: oklch(0.97 0.02 20); --tick: oklch(0.62 0.15 240); }
 .nav-item { align-items: center; justify-content: center; text-decoration: none; }
 a.service-tile { align-items: center; justify-content: center; text-decoration: none; transition: background .15s; }
 .mobile-app.plain {
@@ -489,7 +514,12 @@ textarea.input { resize: none; line-height: 1.5; }
 }
 
 /* Polished premium home surfaces */
-:root { --elev-shadow: oklch(0.35 0.03 250 / 0.10); --elev-shadow-strong: oklch(0.35 0.03 250 / 0.16); }
+:root {
+  --mint: oklch(0.95 0.035 160);
+  --mint-soft: oklch(0.97 0.02 160);
+  --mint-deep: oklch(0.6 0.15 155);
+  --mint-ink: oklch(0.3 0.06 165);
+  --sheet: oklch(0.99 0.006 160); --elev-shadow: oklch(0.35 0.03 250 / 0.10); --elev-shadow-strong: oklch(0.35 0.03 250 / 0.16); }
 .search-field { background: var(--background); border: 1px solid oklch(0.92 0.01 250); box-shadow: 0 10px 24px -8px var(--elev-shadow-strong), 0 2px 6px var(--elev-shadow); }
 .service-tile { border-radius: 14px; border: 1.5px solid color-mix(in oklch, var(--tile-ink) 26%, var(--tile-surface)); background: linear-gradient(180deg, color-mix(in oklch, var(--tile-surface) 70%, var(--background)), var(--tile-surface)); box-shadow: 0 8px 18px -10px color-mix(in oklch, var(--tile-ink) 35%, transparent), 0 2px 4px var(--elev-shadow); }
 .service-tile:hover { background: linear-gradient(180deg, var(--tile-surface), var(--tile-circle)); }
@@ -504,6 +534,11 @@ textarea.input { resize: none; line-height: 1.5; }
 
 /* My Bookings: surfaces and proportions from the mobile reference. */
 :root {
+  --mint: oklch(0.95 0.035 160);
+  --mint-soft: oklch(0.97 0.02 160);
+  --mint-deep: oklch(0.6 0.15 155);
+  --mint-ink: oklch(0.3 0.06 165);
+  --sheet: oklch(0.99 0.006 160);
   --booking-green: oklch(0.49 0.115 163);
   --booking-green-highlight: oklch(0.63 0.125 165);
   --booking-on-green: oklch(1 0 0);
@@ -577,6 +612,11 @@ html, body { min-height: 100%; }
 
 /* Profile screen: premium card surfaces from the mobile reference. */
 :root {
+  --mint: oklch(0.95 0.035 160);
+  --mint-soft: oklch(0.97 0.02 160);
+  --mint-deep: oklch(0.6 0.15 155);
+  --mint-ink: oklch(0.3 0.06 165);
+  --sheet: oklch(0.99 0.006 160);
   --profile-shadow: oklch(0.36 0.035 250 / 10%);
   --profile-card: linear-gradient(115deg, oklch(0.972 0.022 163), oklch(0.955 0.03 172) 60%, oklch(0.938 0.035 178));
   --profile-border: color-mix(in oklch, var(--booking-green) 15%, oklch(0.95 0.01 163));
@@ -1210,6 +1250,11 @@ body {
 
 /* Service provider dashboard: raised, softly tinted surfaces from the reference. */
 :root {
+  --mint: oklch(0.95 0.035 160);
+  --mint-soft: oklch(0.97 0.02 160);
+  --mint-deep: oklch(0.6 0.15 155);
+  --mint-ink: oklch(0.3 0.06 165);
+  --sheet: oklch(0.99 0.006 160);
   --pro-surface-shadow: color-mix(in oklch, var(--foreground) 13%, transparent);
   --pro-green-shadow: color-mix(in oklch, var(--booking-green) 22%, transparent);
   --pro-action-blue: var(--menu-icon-blue);
