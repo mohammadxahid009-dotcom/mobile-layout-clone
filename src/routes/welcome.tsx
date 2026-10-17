@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { User, UserPlus, Lock, Mail, Phone, Eye, EyeOff, ChevronRight, Leaf } from "lucide-react";
+import { signInWithGoogle } from "@/lib/firebase";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({
@@ -29,7 +31,7 @@ function Field({ icon, placeholder, type = "text", trailing }: { icon: ReactNode
   );
 }
 
-function Social() {
+function Social({ onGoogleClick }: { onGoogleClick?: () => void }) {
   return (
     <>
       <div className="mt-6 flex items-center gap-4 px-10 text-sm text-mint-ink/50">
@@ -38,20 +40,57 @@ function Social() {
       <p className="mt-3 text-center text-sm text-mint-ink/70">Continue with</p>
       <div className="mt-3 flex justify-center gap-5">
         {["f", "G"].map((l) => (
-          <button key={l} type="button" className="grid h-12 w-12 place-items-center rounded-full border-2 border-mint-deep text-lg font-bold text-mint-deep transition active:scale-95">{l}</button>
+          <button
+            key={l}
+            type="button"
+            onClick={() => {
+              if (l === "G") {
+                onGoogleClick?.();
+              } else {
+                toast.info("Facebook login is not configured yet. Please continue with Google.");
+              }
+            }}
+            className="grid h-12 w-12 place-items-center rounded-full border-2 border-mint-deep text-lg font-bold text-mint-deep transition active:scale-95"
+            aria-label={l === "G" ? "Continue with Google" : "Continue with Facebook"}
+          >
+            {l}
+          </button>
         ))}
       </div>
     </>
   );
 }
 
-function Welcome() {
+export function Welcome() {
   const navigate = useNavigate();
   const [sheet, setSheet] = useState<Sheet>(null);
   const [shown, setShown] = useState<Exclude<Sheet, null>>("login");
   const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const open = (s: Exclude<Sheet, null>) => { setShown(s); setSheet(s); };
-  const enter = (e: React.FormEvent) => { e.preventDefault(); navigate({ to: "/" }); };
+
+  const handleGoogleAuth = async () => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const user = await signInWithGoogle();
+      toast.success("Signed in with Google!");
+      navigate({ to: user.role === "provider" ? "/pro" : "/" });
+    } catch (err: any) {
+      if (err?.code !== "auth/popup-closed-by-user") {
+        toast.error("Google sign in failed: " + (err?.message || "Please try again"));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const enter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handleGoogleAuth();
+  };
+
   const eye = (
     <button type="button" onClick={() => setShowPw((v) => !v)} className="text-mint-deep" aria-label="Show password">
       {showPw ? <Eye size={20} /> : <EyeOff size={20} />}
@@ -108,9 +147,16 @@ function Welcome() {
               <Field icon={<User size={22} />} placeholder="Username Or Email" />
               <Field icon={<Lock size={22} />} placeholder="Password" type={showPw ? "text" : "password"} trailing={eye} />
             </div>
-            <button className="mt-7 h-14 w-full rounded-full bg-gradient-to-b from-mint-deep to-primary text-lg font-bold text-primary-foreground shadow-lg shadow-mint-deep/30 transition active:scale-[0.98]">Log In</button>
-            <button type="button" className="mx-auto mt-4 block text-sm font-medium text-mint-deep">Forgot Password?</button>
-            <Social />
+            <button
+              disabled={loading}
+              className="mt-7 h-14 w-full rounded-full bg-gradient-to-b from-mint-deep to-primary text-lg font-bold text-primary-foreground shadow-lg shadow-mint-deep/30 transition active:scale-[0.98] disabled:opacity-60"
+            >
+              {loading ? "Signing in..." : "Log In"}
+            </button>
+            <button type="button" onClick={handleGoogleAuth} className="mx-auto mt-4 block text-sm font-medium text-mint-deep">
+              Forgot Password?
+            </button>
+            <Social onGoogleClick={handleGoogleAuth} />
             <p className="mt-6 text-center text-sm text-mint-ink/70">Don't have an account? <button type="button" onClick={() => open("signup")} className="font-bold text-mint-deep">Sign Up</button></p>
           </form>
         ) : (
@@ -124,7 +170,7 @@ function Welcome() {
               <Field icon={<Lock size={22} />} placeholder="Password" type={showPw ? "text" : "password"} trailing={eye} />
             </div>
             <button className="mt-7 h-14 w-full rounded-full bg-gradient-to-b from-mint-deep to-primary text-lg font-bold text-primary-foreground shadow-lg shadow-mint-deep/30 transition active:scale-[0.98]">Sign Up</button>
-            <Social />
+            <Social onGoogleClick={handleGoogleAuth} />
             <p className="mt-6 text-center text-sm text-mint-ink/70">Already have an account? <button type="button" onClick={() => open("login")} className="font-bold text-mint-deep">Log In</button></p>
           </form>
         )}

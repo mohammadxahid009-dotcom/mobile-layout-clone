@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { User, Wrench, Check, ChevronRight, ChevronDown, Calendar, VenusAndMars } from "lucide-react";
+import { signInWithGoogle } from "@/lib/firebase";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/role")({
   head: () => ({
@@ -29,11 +31,13 @@ function Row({ icon, children, chevron }: { icon: ReactNode; children: ReactNode
   );
 }
 
-function RolePage() {
+export function RolePage() {
   const navigate = useNavigate();
   const [role, setRole] = useState<Role | null>(null);
+  const [username, setUsername] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
+  const [loading, setLoading] = useState(false);
   const ages = Array.from({ length: 83 }, (_, i) => i + 18);
 
   const cards = [
@@ -41,9 +45,30 @@ function RolePage() {
     { k: "pro" as const, t: "Service Man", s: "Offer your services, get bookings and grow your business.", Icon: Wrench },
   ];
 
-  const go = (e: React.FormEvent) => {
+  const go = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate({ to: role === "pro" ? "/pro" : "/" });
+    if (!role) {
+      toast.info("Please select a role to continue");
+      return;
+    }
+    const targetRole = role === "pro" ? "provider" : "customer";
+    setLoading(true);
+    try {
+      const user = await signInWithGoogle({
+        targetRole,
+        username: username.trim() || undefined,
+        age: age || undefined,
+        gender: gender || undefined,
+      });
+      toast.success("Account created successfully!");
+      navigate({ to: targetRole === "provider" ? "/pro" : "/" });
+    } catch (err: any) {
+      if (err?.code !== "auth/popup-closed-by-user") {
+        toast.error("Sign in failed: " + (err?.message || "Please complete Google sign-in"));
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const sel = "min-w-0 flex-1 appearance-none bg-transparent text-[15px] outline-none";
@@ -92,7 +117,13 @@ function RolePage() {
           <p className="mt-1 text-mint-ink/60">Choose a username and add a few details to get started.</p>
           <div className="mt-6 space-y-4">
             <Row icon={<User size={22} />}>
-              <input required placeholder="Username" className={`${sel} placeholder:text-mint-ink/50`} />
+              <input
+                required
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className={`${sel} placeholder:text-mint-ink/50`}
+              />
             </Row>
             <Row icon={<Calendar size={22} />} chevron>
               <select required value={age} onChange={(e) => setAge(e.target.value)} className={`${sel} ${age ? "" : "text-mint-ink/50"}`}>
@@ -109,7 +140,12 @@ function RolePage() {
               </select>
             </Row>
           </div>
-          <button disabled={!role} className="mt-7 h-14 w-full rounded-2xl bg-gradient-to-b from-mint-deep to-primary text-lg font-bold text-primary-foreground shadow-lg shadow-mint-deep/30 transition active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100">{role ? "Continue" : "Select a role to continue"}</button>
+          <button
+            disabled={!role || loading}
+            className="mt-7 h-14 w-full rounded-2xl bg-gradient-to-b from-mint-deep to-primary text-lg font-bold text-primary-foreground shadow-lg shadow-mint-deep/30 transition active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+          >
+            {loading ? "Connecting to Google..." : role ? "Continue" : "Select a role to continue"}
+          </button>
           <p className="mt-5 text-center text-sm text-mint-ink/70">Already have an account? <Link to="/welcome" className="font-bold text-mint-deep">Log In</Link></p>
         </form>
       </div>

@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -14,6 +15,12 @@ import { StoreProvider } from "@/lib/store";
 import { Toaster } from "@/components/ui/sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import {
+  getStoredUser,
+  initAuthListener,
+  type StoredAuthUser,
+} from "@/lib/firebase";
+import { Welcome } from "./welcome";
 
 function NotFoundComponent() {
   return (
@@ -124,6 +131,87 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * Global authentication barrier:
+ * Nobody can access any page, feature, or route in the app without logging in first.
+ * If unauthenticated, displays the Welcome / Login onboarding flow.
+ */
+function GlobalAuthGate() {
+  const router = useRouter();
+  const location = useRouterState({ select: (s) => s.location.pathname });
+  const [currentUser, setCurrentUser] = useState<StoredAuthUser | null>(() =>
+    getStoredUser()
+  );
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    // Read from localStorage synchronously on mount
+    const stored = getStoredUser();
+    if (stored) {
+      setCurrentUser(stored);
+    }
+
+    // Keep active session in sync with Firebase Auth and instantaneous app-wide events
+    const unsubscribe = initAuthListener((fbUser) => {
+      setCurrentUser(fbUser);
+    });
+
+    const handleCustomAuthChange = (e: any) => {
+      setCurrentUser(e.detail || null);
+    };
+    window.addEventListener("budgam_auth_change", handleCustomAuthChange);
+
+    setReady(true);
+    return () => {
+      unsubscribe();
+      window.removeEventListener("budgam_auth_change", handleCustomAuthChange);
+    };
+  }, []);
+
+  const isAuthRoute = location === "/welcome" || location === "/role";
+
+  // If unauthenticated and on a protected screen, redirect router to /welcome
+  useEffect(() => {
+    if (ready && !currentUser && !isAuthRoute) {
+      router.navigate({ to: "/welcome" });
+    }
+  }, [ready, currentUser, isAuthRoute, router]);
+
+  // If user is authenticated:
+  if (currentUser) {
+    // If authenticated user navigates to /welcome or /role, redirect them to their home
+    if (isAuthRoute) {
+      if (typeof window !== "undefined") {
+        router.navigate({ to: currentUser.role === "provider" ? "/pro" : "/" });
+      }
+      return null;
+    }
+    return <Outlet />;
+  }
+
+  // During SSR or before mount: if stored user is present, render outlet
+  if (!ready) {
+    if (currentUser) {
+      return <Outlet />;
+    }
+    if (isAuthRoute) {
+      return <Outlet />;
+    }
+    // Prevent unauthenticated flash during hydration
+    return <Welcome />;
+  }
+
+  // If unauthenticated:
+  // Allow public auth onboarding routes (/welcome, /role)
+  if (isAuthRoute) {
+    return <Outlet />;
+  }
+
+  // If attempting to access any protected screen without being logged in,
+  // lock down the view to Welcome so no protected content can be viewed
+  return <Welcome />;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -148,7 +236,8 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <StoreProvider>
-        <Outlet />
+        {/* Protected by GlobalAuthGate: nobody can enter without logging in */}
+        <GlobalAuthGate />
         <Toaster position="top-center" />
       </StoreProvider>
     </QueryClientProvider>
