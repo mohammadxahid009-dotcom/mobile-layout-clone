@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
-import { User, Wrench, Check, ChevronRight, ChevronDown, Calendar, VenusAndMars, Mail, Phone, Lock } from "lucide-react";
+import { useState, useEffect, type ReactNode } from "react";
+import { User, Wrench, Check, ChevronRight, ChevronDown, Calendar, VenusAndMars } from "lucide-react";
 import { signInWithGoogle, signUpWithEmail } from "@/lib/firebase";
-import { formatFirebaseAuthError } from "@/lib/auth-validation";
+import { formatFirebaseAuthError, validateUsername } from "@/lib/auth-validation";
+import { clearPendingSignup, getPendingSignup, type PendingSignupData } from "@/lib/pending-signup";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/role")({
@@ -23,7 +24,7 @@ type Role = "customer" | "pro";
 
 function Row({ icon, children, chevron }: { icon: ReactNode; children: ReactNode; chevron?: boolean }) {
   return (
-    <label className="relative flex h-14 items-center gap-4 rounded-2xl bg-sheet/80 px-5 shadow-md shadow-mint-deep/5">
+    <label className="relative flex h-14 items-center gap-4 rounded-2xl bg-sheet/80 px-5 shadow-md shadow-mint-deep/5 transition focus-within:ring-2 focus-within:ring-mint-deep/30">
       <span className="text-mint-deep">{icon}</span>
       <span className="h-7 w-px bg-mint-deep/15" />
       {children}
@@ -38,11 +39,26 @@ export function RolePage() {
   const [username, setUsername] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
+  const [pendingSignup, setPendingSignup] = useState<PendingSignupData | null>(null);
   const [loading, setLoading] = useState(false);
   const ages = Array.from({ length: 83 }, (_, i) => i + 18);
+
+  // Retrieve pending sign-up data from memory, never from persistent browser storage.
+  useEffect(() => {
+    const parsed = getPendingSignup();
+    if (parsed) {
+      setPendingSignup(parsed);
+      if (parsed.fullName) {
+        const suggested = parsed.fullName
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, "_")
+          .replace(/[^a-z0-9._-]/g, "")
+          .slice(0, 30);
+        setUsername(suggested || parsed.fullName.slice(0, 30));
+      }
+    }
+  }, []);
 
   const cards = [
     { k: "customer" as const, t: "Non Professional", s: "Book local services, get help from verified professionals.", Icon: User },
@@ -55,33 +71,59 @@ export function RolePage() {
       toast.info("Please select a role to continue");
       return;
     }
+
+    const trimmedUsername = username.trim();
+    if (!trimmedUsername) {
+      toast.error("Please enter a username.");
+      return;
+    }
+
+    const usernameCheck = validateUsername(trimmedUsername);
+    if (!usernameCheck.valid) {
+      toast.error(usernameCheck.error);
+      return;
+    }
+
+    if (!age) {
+      toast.error("Please select your age.");
+      return;
+    }
+
+    if (!gender) {
+      toast.error("Please select your gender.");
+      return;
+    }
+
     const targetRole = role === "pro" ? "provider" : "customer";
     setLoading(true);
+
     try {
-      if (email.trim() || password) {
-        if (!email.trim() || !password) {
-          toast.error("Enter both email and password to create an email account.");
-          return;
-        }
+      if (pendingSignup?.email && pendingSignup?.password) {
+        // Complete email & password registration with all details saved in Firestore
         const user = await signUpWithEmail({
-          email,
-          password,
-          username: username.trim(),
-          displayName: username.trim(),
-          phone: phone.trim() || undefined,
-          age: age || undefined,
-          gender: gender || undefined,
+          email: pendingSignup.email,
+          password: pendingSignup.password,
+          username: usernameCheck.sanitized!,
+          displayName: pendingSignup.fullName || usernameCheck.sanitized!,
+          phone: pendingSignup.phone || undefined,
+          age,
+          gender,
           role: targetRole,
         });
+
+        clearPendingSignup();
         toast.success("Account created successfully!");
         navigate({ to: user.role === "provider" ? "/pro" : "/" });
       } else {
+        // Fallback for Google sign-in
         const user = await signInWithGoogle({
           targetRole,
-          username: username.trim() || undefined,
-          age: age || undefined,
-          gender: gender || undefined,
+          username: usernameCheck.sanitized!,
+          age,
+          gender,
         });
+
+        clearPendingSignup();
         toast.success("Account created successfully!");
         navigate({ to: user.role === "provider" ? "/pro" : "/" });
       }
@@ -148,36 +190,6 @@ export function RolePage() {
                 className={`${sel} placeholder:text-mint-ink/50`}
               />
             </Row>
-            <Row icon={<Mail size={22} />}>
-              <input
-                type="email"
-                autoComplete="email"
-                placeholder="Email (for email sign-up)"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`${sel} placeholder:text-mint-ink/50`}
-              />
-            </Row>
-            <Row icon={<Phone size={22} />}>
-              <input
-                type="tel"
-                autoComplete="tel"
-                placeholder="Phone number (optional)"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className={`${sel} placeholder:text-mint-ink/50`}
-              />
-            </Row>
-            <Row icon={<Lock size={22} />}>
-              <input
-                type="password"
-                autoComplete="new-password"
-                placeholder="Password (for email sign-up)"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`${sel} placeholder:text-mint-ink/50`}
-              />
-            </Row>
             <Row icon={<Calendar size={22} />} chevron>
               <select required value={age} onChange={(e) => setAge(e.target.value)} className={`${sel} ${age ? "" : "text-mint-ink/50"}`}>
                 <option value="" disabled>Age</option>
@@ -194,10 +206,11 @@ export function RolePage() {
             </Row>
           </div>
           <button
+            type="submit"
             disabled={!role || loading}
             className="mt-7 h-14 w-full rounded-2xl bg-gradient-to-b from-mint-deep to-primary text-lg font-bold text-primary-foreground shadow-lg shadow-mint-deep/30 transition active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
           >
-            {loading ? "Creating account..." : role ? (email || password ? "Create Account" : "Continue with Google") : "Select a role to continue"}
+            {loading ? "Creating account..." : role ? "Continue" : "Select a role to continue"}
           </button>
           <p className="mt-5 text-center text-sm text-mint-ink/70">Already have an account? <Link to="/welcome" className="font-bold text-mint-deep">Log In</Link></p>
         </form>

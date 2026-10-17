@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { User, UserPlus, Lock, Mail, Eye, EyeOff, ChevronRight, Leaf } from "lucide-react";
+import { User, UserPlus, Lock, Mail, Phone, Eye, EyeOff, ChevronRight, Leaf } from "lucide-react";
 import { signInWithGoogle, signInWithEmail, sendPasswordReset } from "@/lib/firebase";
-import { formatFirebaseAuthError, validateEmail } from "@/lib/auth-validation";
+import { formatFirebaseAuthError, validateEmail, validatePassword, sanitizeText } from "@/lib/auth-validation";
+import { setPendingSignup } from "@/lib/pending-signup";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/welcome")({
@@ -97,12 +98,19 @@ export function Welcome() {
   const navigate = useNavigate();
   const [sheet, setSheet] = useState<Sheet>(null);
   const [shown, setShown] = useState<Exclude<Sheet, null>>("login");
-  const [showPw, setShowPw] = useState(false);
+  const [showLoginPw, setShowLoginPw] = useState(false);
+  const [showSignupPw, setShowSignupPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Email login state
-  const [loginEmail, setLoginEmail] = useState("");
+  const [loginIdentifier, setLoginIdentifier] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+
+  // Sign up state
+  const [signupName, setSignupName] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPhone, setSignupPhone] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
 
   const open = (s: Exclude<Sheet, null>) => {
     setShown(s);
@@ -129,14 +137,21 @@ export function Welcome() {
     e.preventDefault();
     if (loading) return;
 
-    if (!loginEmail.trim() || !loginPassword) {
+    const emailTrimmed = loginIdentifier.trim();
+    if (!emailTrimmed || !loginPassword) {
       toast.error("Please enter both email and password.");
+      return;
+    }
+
+    const emailCheck = validateEmail(emailTrimmed);
+    if (!emailCheck.valid) {
+      toast.error(emailCheck.error);
       return;
     }
 
     setLoading(true);
     try {
-      const user = await signInWithEmail(loginEmail, loginPassword);
+      const user = await signInWithEmail(emailTrimmed, loginPassword);
       toast.success("Welcome back!");
       navigate({ to: user.role === "provider" ? "/pro" : "/" });
     } catch (err: any) {
@@ -146,30 +161,76 @@ export function Welcome() {
     }
   };
 
+  const handleSignupSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const nameTrimmed = sanitizeText(signupName);
+    const emailTrimmed = signupEmail.trim();
+
+    if (!nameTrimmed) {
+      toast.error("Please enter your full name.");
+      return;
+    }
+
+    const emailCheck = validateEmail(emailTrimmed);
+    if (!emailCheck.valid) {
+      toast.error(emailCheck.error);
+      return;
+    }
+
+    const pwCheck = validatePassword(signupPassword);
+    if (!pwCheck.valid) {
+      toast.error(pwCheck.error);
+      return;
+    }
+
+    // Keep pending credentials in memory only while the user completes role/profile details.
+    setPendingSignup({
+      fullName: nameTrimmed,
+      email: emailCheck.sanitized!,
+      phone: signupPhone.trim(),
+      password: signupPassword,
+    });
+
+    setSheet(null);
+    navigate({ to: "/role" });
+  };
+
   const handleForgotPassword = async () => {
-    const emailVal = validateEmail(loginEmail);
+    const emailVal = validateEmail(loginIdentifier);
     if (!emailVal.valid) {
-      toast.error("Please type your email address into the email field first.");
+      toast.error("Please enter your email address into the input field first.");
       return;
     }
     try {
-      await sendPasswordReset(loginEmail);
+      await sendPasswordReset(loginIdentifier);
       toast.success("Password reset email sent! Check your inbox.");
     } catch (err: any) {
       toast.error(formatFirebaseAuthError(err));
     }
   };
 
-  const eye = (
+  const loginEye = (
     <button
       type="button"
-      onClick={() => setShowPw((v) => !v)}
+      onClick={() => setShowLoginPw((v) => !v)}
       className="text-mint-deep hover:opacity-80"
-      aria-label={showPw ? "Hide password" : "Show password"}
+      aria-label={showLoginPw ? "Hide password" : "Show password"}
     >
-      {showPw ? <Eye size={20} /> : <EyeOff size={20} />}
+      {showLoginPw ? <Eye size={20} /> : <EyeOff size={20} />}
     </button>
   );
+
+  const signupEye = (
+    <button
+      type="button"
+      onClick={() => setShowSignupPw((v) => !v)}
+      className="text-mint-deep hover:opacity-80"
+      aria-label={showSignupPw ? "Hide password" : "Show password"}
+    >
+      {showSignupPw ? <Eye size={20} /> : <EyeOff size={20} />}
+    </button>
+  );
+
   const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
   return (
@@ -219,25 +280,25 @@ export function Welcome() {
             <p className="mt-2 text-mint-ink/70">Welcome back! Please login to your account.</p>
             <div className="mt-7 space-y-4">
               <Field
-                icon={<Mail size={22} />}
-                placeholder="Email address"
-                type="email"
-                name="email"
-                autoComplete="email"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
+                icon={<User size={22} />}
+                placeholder="Username Or Email"
+                type="text"
+                name="identifier"
+                autoComplete="username"
+                value={loginIdentifier}
+                onChange={(e) => setLoginIdentifier(e.target.value)}
                 required
               />
               <Field
                 icon={<Lock size={22} />}
                 placeholder="Password"
-                type={showPw ? "text" : "password"}
+                type={showLoginPw ? "text" : "password"}
                 name="password"
                 autoComplete="current-password"
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 required
-                trailing={eye}
+                trailing={loginEye}
               />
             </div>
             <button
@@ -250,7 +311,7 @@ export function Welcome() {
             <button
               type="button"
               onClick={handleForgotPassword}
-              className="mx-auto mt-4 block text-sm font-medium text-mint-deep hover:underline"
+              className="mx-auto mt-4 block text-center text-sm font-medium text-mint-deep hover:underline"
             >
               Forgot Password?
             </button>
@@ -259,10 +320,7 @@ export function Welcome() {
               Don't have an account?{" "}
               <button
                 type="button"
-                onClick={() => {
-                  setSheet(null);
-                  navigate({ to: "/role" });
-                }}
+                onClick={() => open("signup")}
                 className="font-bold text-mint-deep"
               >
                 Sign Up
@@ -270,28 +328,70 @@ export function Welcome() {
             </p>
           </form>
         ) : (
-          <div key="s" className="animate-in fade-in duration-500">
+          <form onSubmit={handleSignupSubmit} key="s" className="animate-in fade-in duration-500">
             <h2 className="text-4xl font-extrabold">Sign Up</h2>
-            <p className="mt-2 text-mint-ink/70">Pick your role and profile details to create your account.</p>
+            <p className="mt-2 text-mint-ink/70">Create your account to get started.</p>
+            <div className="mt-7 space-y-4">
+              <Field
+                icon={<User size={22} />}
+                placeholder="Full Name"
+                type="text"
+                name="fullname"
+                autoComplete="name"
+                value={signupName}
+                onChange={(e) => setSignupName(e.target.value)}
+                required
+              />
+              <Field
+                icon={<Mail size={22} />}
+                placeholder="Email"
+                type="email"
+                name="email"
+                autoComplete="email"
+                value={signupEmail}
+                onChange={(e) => setSignupEmail(e.target.value)}
+                required
+              />
+              <Field
+                icon={<Phone size={22} />}
+                placeholder="Phone Number"
+                type="tel"
+                name="phone"
+                autoComplete="tel"
+                value={signupPhone}
+                onChange={(e) => setSignupPhone(e.target.value)}
+              />
+              <Field
+                icon={<Lock size={22} />}
+                placeholder="Password"
+                type={showSignupPw ? "text" : "password"}
+                name="password"
+                autoComplete="new-password"
+                value={signupPassword}
+                onChange={(e) => setSignupPassword(e.target.value)}
+                required
+                trailing={signupEye}
+              />
+            </div>
             <button
-              type="button"
-              onClick={() => {
-                setSheet(null);
-                navigate({ to: "/role" });
-              }}
-              className="mt-7 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-b from-mint-deep to-primary text-lg font-bold text-primary-foreground shadow-lg shadow-mint-deep/30 transition hover:brightness-105 active:scale-[0.98]"
+              type="submit"
+              disabled={loading}
+              className="mt-7 h-14 w-full rounded-full bg-gradient-to-b from-mint-deep to-primary text-lg font-bold text-primary-foreground shadow-lg shadow-mint-deep/30 transition hover:brightness-105 active:scale-[0.98] disabled:opacity-60"
             >
-              <span>Continue to Role & Details</span>
-              <ChevronRight size={20} />
+              Sign Up
             </button>
             <Social onGoogleClick={handleGoogleAuth} />
             <p className="mt-6 text-center text-sm text-mint-ink/70">
               Already have an account?{" "}
-              <button type="button" onClick={() => open("login")} className="font-bold text-mint-deep">
+              <button
+                type="button"
+                onClick={() => open("login")}
+                className="font-bold text-mint-deep"
+              >
                 Log In
               </button>
             </p>
-          </div>
+          </form>
         )}
       </div>
     </div>
