@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { User, Wrench, Check, ChevronRight, ChevronDown, Calendar, VenusAndMars } from "lucide-react";
-import { signInWithGoogle } from "@/lib/firebase";
+import { User, Wrench, Check, ChevronRight, ChevronDown, Calendar, VenusAndMars, Mail, Phone, Lock } from "lucide-react";
+import { signInWithGoogle, signUpWithEmail } from "@/lib/firebase";
+import { formatFirebaseAuthError } from "@/lib/auth-validation";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/role")({
@@ -37,6 +38,9 @@ export function RolePage() {
   const [username, setUsername] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const ages = Array.from({ length: 83 }, (_, i) => i + 18);
 
@@ -54,17 +58,36 @@ export function RolePage() {
     const targetRole = role === "pro" ? "provider" : "customer";
     setLoading(true);
     try {
-      const user = await signInWithGoogle({
-        targetRole,
-        username: username.trim() || undefined,
-        age: age || undefined,
-        gender: gender || undefined,
-      });
-      toast.success("Account created successfully!");
-      navigate({ to: targetRole === "provider" ? "/pro" : "/" });
+      if (email.trim() || password) {
+        if (!email.trim() || !password) {
+          toast.error("Enter both email and password to create an email account.");
+          return;
+        }
+        const user = await signUpWithEmail({
+          email,
+          password,
+          username: username.trim(),
+          displayName: username.trim(),
+          phone: phone.trim() || undefined,
+          age: age || undefined,
+          gender: gender || undefined,
+          role: targetRole,
+        });
+        toast.success("Account created successfully!");
+        navigate({ to: user.role === "provider" ? "/pro" : "/" });
+      } else {
+        const user = await signInWithGoogle({
+          targetRole,
+          username: username.trim() || undefined,
+          age: age || undefined,
+          gender: gender || undefined,
+        });
+        toast.success("Account created successfully!");
+        navigate({ to: user.role === "provider" ? "/pro" : "/" });
+      }
     } catch (err: any) {
       if (err?.code !== "auth/popup-closed-by-user") {
-        toast.error("Sign in failed: " + (err?.message || "Please complete Google sign-in"));
+        toast.error(formatFirebaseAuthError(err));
       }
     } finally {
       setLoading(false);
@@ -125,6 +148,36 @@ export function RolePage() {
                 className={`${sel} placeholder:text-mint-ink/50`}
               />
             </Row>
+            <Row icon={<Mail size={22} />}>
+              <input
+                type="email"
+                autoComplete="email"
+                placeholder="Email (for email sign-up)"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`${sel} placeholder:text-mint-ink/50`}
+              />
+            </Row>
+            <Row icon={<Phone size={22} />}>
+              <input
+                type="tel"
+                autoComplete="tel"
+                placeholder="Phone number (optional)"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className={`${sel} placeholder:text-mint-ink/50`}
+              />
+            </Row>
+            <Row icon={<Lock size={22} />}>
+              <input
+                type="password"
+                autoComplete="new-password"
+                placeholder="Password (for email sign-up)"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`${sel} placeholder:text-mint-ink/50`}
+              />
+            </Row>
             <Row icon={<Calendar size={22} />} chevron>
               <select required value={age} onChange={(e) => setAge(e.target.value)} className={`${sel} ${age ? "" : "text-mint-ink/50"}`}>
                 <option value="" disabled>Age</option>
@@ -144,7 +197,7 @@ export function RolePage() {
             disabled={!role || loading}
             className="mt-7 h-14 w-full rounded-2xl bg-gradient-to-b from-mint-deep to-primary text-lg font-bold text-primary-foreground shadow-lg shadow-mint-deep/30 transition active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
           >
-            {loading ? "Connecting to Google..." : role ? "Continue" : "Select a role to continue"}
+            {loading ? "Creating account..." : role ? (email || password ? "Create Account" : "Continue with Google") : "Select a role to continue"}
           </button>
           <p className="mt-5 text-center text-sm text-mint-ink/70">Already have an account? <Link to="/welcome" className="font-bold text-mint-deep">Log In</Link></p>
         </form>

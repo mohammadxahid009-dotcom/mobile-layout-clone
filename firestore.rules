@@ -1,0 +1,43 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Validation helpers
+    function isValidRole(role) {
+      return role in ['customer', 'provider'];
+    }
+
+    // Users collection:
+    // Each user document is keyed strictly by request.auth.uid.
+    // A user can only read, create, update, or delete their own document.
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+
+      // On create, enforce that the creator matches the document ID and valid role
+      allow create: if isOwner(userId)
+                    && request.resource.data.uid == userId
+                    && (request.resource.data.role == null || isValidRole(request.resource.data.role));
+
+      // On update, prevent changing the uid and ensure only the owner can modify
+      allow update: if isOwner(userId)
+                    && request.resource.data.uid == resource.data.uid;
+
+      allow delete: if isOwner(userId);
+    }
+
+    // Default deny for all other unmatched collections to maintain complete isolation
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

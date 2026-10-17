@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { User, UserPlus, Lock, Mail, Phone, Eye, EyeOff, ChevronRight, Leaf } from "lucide-react";
-import { signInWithGoogle } from "@/lib/firebase";
+import { User, UserPlus, Lock, Mail, Eye, EyeOff, ChevronRight, Leaf } from "lucide-react";
+import { signInWithGoogle, signInWithEmail, sendPasswordReset } from "@/lib/firebase";
+import { formatFirebaseAuthError, validateEmail } from "@/lib/auth-validation";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/welcome")({
@@ -20,12 +21,43 @@ export const Route = createFileRoute("/welcome")({
 
 type Sheet = "login" | "signup" | null;
 
-function Field({ icon, placeholder, type = "text", trailing }: { icon: ReactNode; placeholder: string; type?: string; trailing?: ReactNode }) {
+interface FieldProps {
+  icon: ReactNode;
+  placeholder: string;
+  type?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  required?: boolean;
+  name?: string;
+  autoComplete?: string;
+  trailing?: ReactNode;
+}
+
+function Field({
+  icon,
+  placeholder,
+  type = "text",
+  value,
+  onChange,
+  required,
+  name,
+  autoComplete,
+  trailing,
+}: FieldProps) {
   return (
-    <label className="flex h-14 items-center gap-3 rounded-full bg-mint px-5">
+    <label className="flex h-14 items-center gap-3 rounded-full bg-mint px-5 transition focus-within:ring-2 focus-within:ring-mint-deep/30">
       <span className="text-mint-deep">{icon}</span>
       <span className="h-6 w-px bg-mint-deep/25" />
-      <input type={type} placeholder={placeholder} className="min-w-0 flex-1 bg-transparent text-[15px] text-mint-ink outline-none placeholder:text-mint-ink/50" />
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        required={required}
+        autoComplete={autoComplete}
+        placeholder={placeholder}
+        className="min-w-0 flex-1 bg-transparent text-[15px] text-mint-ink outline-none placeholder:text-mint-ink/50"
+      />
       {trailing}
     </label>
   );
@@ -47,10 +79,10 @@ function Social({ onGoogleClick }: { onGoogleClick?: () => void }) {
               if (l === "G") {
                 onGoogleClick?.();
               } else {
-                toast.info("Facebook login is not configured yet. Please continue with Google.");
+                toast.info("Facebook login is not configured yet. Please continue with Google or Email.");
               }
             }}
-            className="grid h-12 w-12 place-items-center rounded-full border-2 border-mint-deep text-lg font-bold text-mint-deep transition active:scale-95"
+            className="grid h-12 w-12 place-items-center rounded-full border-2 border-mint-deep text-lg font-bold text-mint-deep transition hover:bg-mint-deep/10 active:scale-95"
             aria-label={l === "G" ? "Continue with Google" : "Continue with Facebook"}
           >
             {l}
@@ -68,7 +100,14 @@ export function Welcome() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const open = (s: Exclude<Sheet, null>) => { setShown(s); setSheet(s); };
+  // Email login state
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+
+  const open = (s: Exclude<Sheet, null>) => {
+    setShown(s);
+    setSheet(s);
+  };
 
   const handleGoogleAuth = async () => {
     if (loading) return;
@@ -79,20 +118,55 @@ export function Welcome() {
       navigate({ to: user.role === "provider" ? "/pro" : "/" });
     } catch (err: any) {
       if (err?.code !== "auth/popup-closed-by-user") {
-        toast.error("Google sign in failed: " + (err?.message || "Please try again"));
+        toast.error("Google sign in failed: " + formatFirebaseAuthError(err));
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const enter = async (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    await handleGoogleAuth();
+    if (loading) return;
+
+    if (!loginEmail.trim() || !loginPassword) {
+      toast.error("Please enter both email and password.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const user = await signInWithEmail(loginEmail, loginPassword);
+      toast.success("Welcome back!");
+      navigate({ to: user.role === "provider" ? "/pro" : "/" });
+    } catch (err: any) {
+      toast.error(formatFirebaseAuthError(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    const emailVal = validateEmail(loginEmail);
+    if (!emailVal.valid) {
+      toast.error("Please type your email address into the email field first.");
+      return;
+    }
+    try {
+      await sendPasswordReset(loginEmail);
+      toast.success("Password reset email sent! Check your inbox.");
+    } catch (err: any) {
+      toast.error(formatFirebaseAuthError(err));
+    }
   };
 
   const eye = (
-    <button type="button" onClick={() => setShowPw((v) => !v)} className="text-mint-deep" aria-label="Show password">
+    <button
+      type="button"
+      onClick={() => setShowPw((v) => !v)}
+      className="text-mint-deep hover:opacity-80"
+      aria-label={showPw ? "Hide password" : "Show password"}
+    >
       {showPw ? <Eye size={20} /> : <EyeOff size={20} />}
     </button>
   );
@@ -140,39 +214,84 @@ export function Welcome() {
       >
         <div className="mx-auto mb-5 h-1.5 w-12 cursor-pointer rounded-full bg-mint-deep/20" onClick={() => setSheet(null)} />
         {shown === "login" ? (
-          <form onSubmit={enter} key="l" className="animate-in fade-in duration-500">
+          <form onSubmit={handleEmailLogin} key="l" className="animate-in fade-in duration-500">
             <h2 className="text-4xl font-extrabold">Log In</h2>
             <p className="mt-2 text-mint-ink/70">Welcome back! Please login to your account.</p>
             <div className="mt-7 space-y-4">
-              <Field icon={<User size={22} />} placeholder="Username Or Email" />
-              <Field icon={<Lock size={22} />} placeholder="Password" type={showPw ? "text" : "password"} trailing={eye} />
+              <Field
+                icon={<Mail size={22} />}
+                placeholder="Email address"
+                type="email"
+                name="email"
+                autoComplete="email"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                required
+              />
+              <Field
+                icon={<Lock size={22} />}
+                placeholder="Password"
+                type={showPw ? "text" : "password"}
+                name="password"
+                autoComplete="current-password"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                required
+                trailing={eye}
+              />
             </div>
             <button
+              type="submit"
               disabled={loading}
-              className="mt-7 h-14 w-full rounded-full bg-gradient-to-b from-mint-deep to-primary text-lg font-bold text-primary-foreground shadow-lg shadow-mint-deep/30 transition active:scale-[0.98] disabled:opacity-60"
+              className="mt-7 h-14 w-full rounded-full bg-gradient-to-b from-mint-deep to-primary text-lg font-bold text-primary-foreground shadow-lg shadow-mint-deep/30 transition hover:brightness-105 active:scale-[0.98] disabled:opacity-60"
             >
               {loading ? "Signing in..." : "Log In"}
             </button>
-            <button type="button" onClick={handleGoogleAuth} className="mx-auto mt-4 block text-sm font-medium text-mint-deep">
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              className="mx-auto mt-4 block text-sm font-medium text-mint-deep hover:underline"
+            >
               Forgot Password?
             </button>
             <Social onGoogleClick={handleGoogleAuth} />
-            <p className="mt-6 text-center text-sm text-mint-ink/70">Don't have an account? <button type="button" onClick={() => open("signup")} className="font-bold text-mint-deep">Sign Up</button></p>
+            <p className="mt-6 text-center text-sm text-mint-ink/70">
+              Don't have an account?{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setSheet(null);
+                  navigate({ to: "/role" });
+                }}
+                className="font-bold text-mint-deep"
+              >
+                Sign Up
+              </button>
+            </p>
           </form>
         ) : (
-          <form onSubmit={(e) => { e.preventDefault(); navigate({ to: "/role" }); }} key="s" className="animate-in fade-in duration-500">
+          <div key="s" className="animate-in fade-in duration-500">
             <h2 className="text-4xl font-extrabold">Sign Up</h2>
-            <p className="mt-2 text-mint-ink/70">Create your account to get started.</p>
-            <div className="mt-7 space-y-4">
-              <Field icon={<User size={22} />} placeholder="Full Name" />
-              <Field icon={<Mail size={22} />} placeholder="Email" type="email" />
-              <Field icon={<Phone size={22} />} placeholder="Phone Number" type="tel" />
-              <Field icon={<Lock size={22} />} placeholder="Password" type={showPw ? "text" : "password"} trailing={eye} />
-            </div>
-            <button className="mt-7 h-14 w-full rounded-full bg-gradient-to-b from-mint-deep to-primary text-lg font-bold text-primary-foreground shadow-lg shadow-mint-deep/30 transition active:scale-[0.98]">Sign Up</button>
+            <p className="mt-2 text-mint-ink/70">Pick your role and profile details to create your account.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setSheet(null);
+                navigate({ to: "/role" });
+              }}
+              className="mt-7 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-b from-mint-deep to-primary text-lg font-bold text-primary-foreground shadow-lg shadow-mint-deep/30 transition hover:brightness-105 active:scale-[0.98]"
+            >
+              <span>Continue to Role & Details</span>
+              <ChevronRight size={20} />
+            </button>
             <Social onGoogleClick={handleGoogleAuth} />
-            <p className="mt-6 text-center text-sm text-mint-ink/70">Already have an account? <button type="button" onClick={() => open("login")} className="font-bold text-mint-deep">Log In</button></p>
-          </form>
+            <p className="mt-6 text-center text-sm text-mint-ink/70">
+              Already have an account?{" "}
+              <button type="button" onClick={() => open("login")} className="font-bold text-mint-deep">
+                Log In
+              </button>
+            </p>
+          </div>
         )}
       </div>
     </div>
