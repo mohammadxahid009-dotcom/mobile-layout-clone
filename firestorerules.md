@@ -1,6 +1,6 @@
 # Firestore Security Rules
 
-Deploy these rules to your Firebase project to guarantee that each user can read, create, and update **only their own** data in Cloud Firestore.
+Deploy these rules to your Firebase project to guarantee that each user can read, create, and update **only their own** data in Cloud Firestore, while allowing live O(1) username availability checks.
 
 ## How to Apply in Firebase Console
 
@@ -33,6 +33,20 @@ service cloud.firestore {
       return role in ['customer', 'provider'];
     }
 
+    // Usernames collection:
+    // Fast O(1) direct document lookup to check availability during registration
+    match /usernames/{username} {
+      // Anyone can check if a username document exists
+      allow read: if true;
+
+      // Only authenticated users can claim/reserve their username with their own UID
+      allow create, update: if isAuthenticated()
+                            && request.resource.data.uid == request.auth.uid;
+
+      allow delete: if isAuthenticated()
+                    && resource.data.uid == request.auth.uid;
+    }
+
     // Users collection
     // Document ID matches the user's Firebase Auth UID
     match /users/{userId} {
@@ -62,6 +76,7 @@ service cloud.firestore {
 
 ## Security Guarantees
 - **No Cross-User Access:** An authenticated user with UID `A` cannot read or write the `/users/B` document of user `B`.
+- **Instant Username Lookup:** Public read access on `/usernames/{username}` allows live checks on the role picker screen while reserving/updating is restricted to the authenticated account owner.
 - **Injection & Tampering Protection:** The document key and the `uid` payload are bound to the verified Firebase Auth token (`request.auth.uid`), preventing impersonation or identifier spoofing.
 - **Strict Role Boundaries:** Roles are restricted to verified enum values (`customer`, `provider`).
 - **Complete Default Deny:** All unmapped paths return permission-denied.

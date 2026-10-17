@@ -17,6 +17,11 @@ import {
   doc,
   setDoc,
   getDoc,
+  collection,
+  query,
+  where,
+  limit,
+  getDocs,
   serverTimestamp,
   type Firestore,
 } from "firebase/firestore";
@@ -136,6 +141,78 @@ export function saveStoredUser(user: StoredAuthUser | null) {
 }
 
 /**
+ * In-memory cache of username checks to make consecutive lookups instantaneous (0ms)
+ */
+const usernameAvailabilityCache = new Map<string, boolean>();
+
+/**
+ * Fast lookup to check if a username is available in the database.
+ * Uses local memory cache and direct Firestore O(1) document lookup on /usernames/{usernameLower}.
+ */
+export async function isUsernameAvailable(rawUsername: string): Promise<boolean> {
+  const clean = rawUsername.trim().toLowerCase();
+  if (!clean || clean.length < 3) return false;
+
+  if (usernameAvailabilityCache.has(clean)) {
+    return usernameAvailabilityCache.get(clean)!;
+  }
+
+  try {
+    // 1. Direct point document lookup in /usernames/{clean} (fastest possible Firestore read)
+    const usernameDocRef = doc(db, "usernames", clean);
+    const snap = await getDoc(usernameDocRef);
+    if (snap.exists()) {
+      usernameAvailabilityCache.set(clean, false);
+      return false;
+    }
+  } catch (err) {
+    console.warn("Direct /usernames lookup check:", err);
+  }
+
+  try {
+    // 2. Fallback check against /users collection where username matches
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("username", "==", rawUsername.trim()), limit(1));
+    const querySnap = await getDocs(q);
+    if (!querySnap.empty) {
+      usernameAvailabilityCache.set(clean, false);
+      return false;
+    }
+
+    if (rawUsername.trim() !== clean) {
+      const qLower = query(usersRef, where("username", "==", clean), limit(1));
+      const snapLower = await getDocs(qLower);
+      if (!snapLower.empty) {
+        usernameAvailabilityCache.set(clean, false);
+        return false;
+      }
+    }
+  } catch (err) {
+    console.warn("Collection query fallback check:", err);
+  }
+
+  usernameAvailabilityCache.set(clean, true);
+  return true;
+}
+
+/**
+ * Reserve a unique username in Firestore /usernames/{usernameLower}
+ */
+export async function reserveUsername(username: string, uid: string): Promise<void> {
+  const clean = username.trim().toLowerCase();
+  try {
+    await setDoc(doc(db, "usernames", clean), {
+      uid,
+      username: username.trim(),
+      createdAt: serverTimestamp(),
+    });
+    usernameAvailabilityCache.set(clean, false);
+  } catch (err) {
+    console.warn("Could not reserve username in /usernames index:", err);
+  }
+}
+
+/**
  * Persist or update user document in Firestore database with input sanitization.
  * Saves username, age, gender, phone, email, and role securely under `/users/{uid}`.
  */
@@ -172,7 +249,6 @@ export async function syncUserToFirestore(
     // Use setDoc with merge to avoid overwriting existing properties
     await setDoc(userDocRef, dataToSave, { merge: true });
   } catch (error) {
-    // Firestore rules might restrict if user is unauthenticated or rules misconfigured
     console.warn("Could not sync user to Firestore database:", error);
     if (required) throw error;
   }
@@ -196,7 +272,7 @@ export async function fetchUserFromFirestore(uid: string): Promise<Record<string
 /**
  * Sign Up with Email and Password.
  * Validates credentials, creates Firebase Auth account, stores profile in Firestore,
- * updates Auth display name, and initiates persistent session.
+ * reserves username index, updates Auth display name, and initiates persistent session.
  */
 export async function signUpWithEmail(params: {
   email: string;
@@ -240,6 +316,9 @@ export async function signUpWithEmail(params: {
   } catch {
     // non-fatal
   }
+
+  // Reserve username in /usernames index
+  await reserveUsername(cleanUsername, fbUser.uid);
 
   // Persist all user details into Firestore database under /users/{uid}
   await syncUserToFirestore(fbUser, {
@@ -322,10 +401,12 @@ export async function signInWithEmail(emailInput: string, passwordInput: string)
     gender: resolvedGender,
   };
 
-  saveStoredUser(storedUser);
-  notifyAuthListeners(storedUser);
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent("budgam_auth_change", { detail: storedUser }));
+  if (resolvedUsername) {
+    saveStoredUser(storedUser);
+    notifyAuthListeners(storedUser);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("budgam_auth_change", { detail: storedUser }));
+    }
   }
 
   // Update last login timestamp in Firestore
@@ -342,7 +423,126 @@ export async function signInWithEmail(emailInput: string, passwordInput: string)
 }
 
 /**
- * Sign in with Google Popup
+ * Complete profile details for an authenticated Firebase user (e.g., from Google auth).
+ * Sets role, username, age, and gender, reserves the username, and activates session.
+ */
+export async function completeUserProfile(
+  fbUser: FirebaseUser,
+  details: {
+    role: AppUserRole;
+    username: string;
+    displayName?: string;
+    age?: string | number;
+    gender?: string;
+    phone?: string;
+  }
+): Promise<StoredAuthUser> {
+  const cleanUsername = sanitizeText(details.username);
+  const cleanRole: AppUserRole = details.role === "provider" ? "provider" : "customer";
+  const cleanAge = details.age !== undefined && details.age !== "" ? String(details.age) : undefined;
+  const cleanGender = details.gender ? sanitizeText(details.gender) : undefined;
+  const cleanPhone = details.phone ? sanitizeText(details.phone) : undefined;
+
+  try {
+    await updateProfile(fbUser, { displayName: details.displayName || cleanUsername });
+  } catch {
+    // non-fatal
+  }
+
+  // Reserve unique username
+  await reserveUsername(cleanUsername, fbUser.uid);
+
+  // Sync to Firestore /users/{uid}
+  await syncUserToFirestore(
+    fbUser,
+    {
+      role: cleanRole,
+      displayName: details.displayName || cleanUsername,
+      username: cleanUsername,
+      phone: cleanPhone,
+      age: cleanAge,
+      gender: cleanGender,
+    },
+    true
+  );
+
+  const storedUser: StoredAuthUser = {
+    uid: fbUser.uid,
+    email: fbUser.email,
+    displayName: details.displayName || cleanUsername,
+    photoURL: fbUser.photoURL || null,
+    role: cleanRole,
+    providerId: fbUser.providerData[0]?.providerId || "google.com",
+    username: cleanUsername,
+    phone: cleanPhone,
+    age: cleanAge,
+    gender: cleanGender,
+  };
+
+  saveStoredUser(storedUser);
+  notifyAuthListeners(storedUser);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("budgam_auth_change", { detail: storedUser }));
+  }
+
+  return storedUser;
+}
+
+/**
+ * Initiate Google Sign-In with popup.
+ * Checks whether user already has a complete profile in Firestore.
+ * Returns { isNewUser: true } if the user needs to select role/username,
+ * or { isNewUser: false, user } if they already have an existing profile.
+ */
+export async function initiateGoogleAuth(): Promise<{
+  isNewUser: boolean;
+  user: StoredAuthUser;
+}> {
+  const result = await signInWithPopup(auth, googleProvider);
+  const fbUser = result.user;
+
+  // Check if profile exists in Firestore and has role & username
+  const profile = await fetchUserFromFirestore(fbUser.uid);
+  const hasCompleteProfile = Boolean(profile?.role && profile?.username);
+
+  if (hasCompleteProfile) {
+    const role: AppUserRole = profile!.role === "provider" ? "provider" : "customer";
+    const storedUser: StoredAuthUser = {
+      uid: fbUser.uid,
+      email: fbUser.email,
+      displayName: profile!.displayName || profile!.username || fbUser.displayName || "User",
+      photoURL: fbUser.photoURL,
+      role,
+      providerId: "google.com",
+      username: profile!.username,
+      phone: profile!.phone,
+      age: profile!.age,
+      gender: profile!.gender,
+    };
+    saveStoredUser(storedUser);
+    notifyAuthListeners(storedUser);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("budgam_auth_change", { detail: storedUser }));
+    }
+    return { isNewUser: false, user: storedUser };
+  }
+
+  // Incomplete profile / new user: Do NOT mark as finished storedUser yet.
+  const tempUser: StoredAuthUser = {
+    uid: fbUser.uid,
+    email: fbUser.email,
+    displayName: fbUser.displayName || "User",
+    photoURL: fbUser.photoURL,
+    role: "customer",
+    providerId: "google.com",
+    username: undefined,
+  };
+
+  return { isNewUser: true, user: tempUser };
+}
+
+/**
+ * Sign in with Google Popup (with optional role & profile details passed directly)
  */
 export async function signInWithGoogle(
   options: {
@@ -386,6 +586,10 @@ export async function signInWithGoogle(
     resolvedRole = options.targetRole;
   }
 
+  if (resolvedUsername) {
+    await reserveUsername(resolvedUsername, fbUser.uid);
+  }
+
   const storedUser: StoredAuthUser = {
     uid: fbUser.uid,
     email: fbUser.email,
@@ -403,12 +607,14 @@ export async function signInWithGoogle(
     gender: resolvedGender,
   };
 
-  saveStoredUser(storedUser);
-  notifyAuthListeners(storedUser);
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(
-      new CustomEvent("budgam_auth_change", { detail: storedUser })
-    );
+  if (resolvedUsername) {
+    saveStoredUser(storedUser);
+    notifyAuthListeners(storedUser);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("budgam_auth_change", { detail: storedUser })
+      );
+    }
   }
 
   syncUserToFirestore(fbUser, {
@@ -458,11 +664,35 @@ export function initAuthListener(onUserChange: (user: StoredAuthUser | null) => 
   const unsubFb = onAuthStateChanged(auth, async (fbUser) => {
     if (fbUser) {
       const existing = getStoredUser();
-      const role: AppUserRole = existing?.role || "customer";
+      let username = existing?.username;
+      let role: AppUserRole = existing?.role || "customer";
+      let phone = existing?.phone;
+      let age = existing?.age;
+      let gender = existing?.gender;
+
+      if (!username) {
+        const profile = await fetchUserFromFirestore(fbUser.uid);
+        if (profile?.username) {
+          username = profile.username;
+          if (profile.role === "provider" || profile.role === "customer") {
+            role = profile.role;
+          }
+          phone = profile.phone;
+          age = profile.age;
+          gender = profile.gender;
+        }
+      }
+
+      // If the user has not completed onboarding with a username, do not finalize session
+      if (!username) {
+        return;
+      }
+
       const updated: StoredAuthUser = {
         uid: fbUser.uid,
         email: fbUser.email,
         displayName:
+          username ||
           existing?.displayName ||
           fbUser.displayName ||
           fbUser.email?.split("@")[0] ||
@@ -470,10 +700,10 @@ export function initAuthListener(onUserChange: (user: StoredAuthUser | null) => 
         photoURL: fbUser.photoURL,
         role,
         providerId: fbUser.providerData[0]?.providerId || "google.com",
-        username: existing?.username,
-        phone: existing?.phone,
-        age: existing?.age,
-        gender: existing?.gender,
+        username,
+        phone,
+        age,
+        gender,
       };
       saveStoredUser(updated);
       onUserChange(updated);

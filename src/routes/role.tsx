@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, type ReactNode } from "react";
-import { User, Wrench, Check, ChevronRight, ChevronDown, Calendar, VenusAndMars } from "lucide-react";
-import { signInWithGoogle, signUpWithEmail } from "@/lib/firebase";
+import { User, Wrench, Check, ChevronRight, ChevronDown, Calendar, VenusAndMars, Loader2 } from "lucide-react";
+import { auth, isUsernameAvailable, signUpWithEmail, signInWithGoogle, completeUserProfile } from "@/lib/firebase";
 import { formatFirebaseAuthError, validateUsername } from "@/lib/auth-validation";
 import { clearPendingSignup, getPendingSignup, type PendingSignupData } from "@/lib/pending-signup";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ export const Route = createFileRoute("/role")({
 });
 
 type Role = "customer" | "pro";
+type UsernameStatus = "idle" | "checking" | "available" | "taken" | "invalid";
 
 function Row({ icon, children, chevron }: { icon: ReactNode; children: ReactNode; chevron?: boolean }) {
   return (
@@ -37,28 +38,66 @@ export function RolePage() {
   const navigate = useNavigate();
   const [role, setRole] = useState<Role | null>(null);
   const [username, setUsername] = useState("");
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
+  const [usernameError, setUsernameError] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const [pendingSignup, setPendingSignup] = useState<PendingSignupData | null>(null);
   const [loading, setLoading] = useState(false);
   const ages = Array.from({ length: 83 }, (_, i) => i + 18);
 
-  // Retrieve pending sign-up data from memory, never from persistent browser storage.
+  // Retrieve pending sign-up data from memory; do NOT provide any prefilled suggested username
   useEffect(() => {
     const parsed = getPendingSignup();
     if (parsed) {
       setPendingSignup(parsed);
-      if (parsed.fullName) {
-        const suggested = parsed.fullName
-          .trim()
-          .toLowerCase()
-          .replace(/\s+/g, "_")
-          .replace(/[^a-z0-9._-]/g, "")
-          .slice(0, 30);
-        setUsername(suggested || parsed.fullName.slice(0, 30));
-      }
     }
+    // Field starts empty as explicitly requested
+    setUsername("");
   }, []);
+
+  // Debounced fast database availability check once user stops typing
+  useEffect(() => {
+    const trimmed = username.trim();
+    if (!trimmed) {
+      setUsernameStatus("idle");
+      setUsernameError("");
+      return;
+    }
+
+    const val = validateUsername(trimmed);
+    if (!val.valid) {
+      setUsernameStatus("invalid");
+      setUsernameError(val.error || `'${trimmed}' is not available`);
+      return;
+    }
+
+    setUsernameStatus("checking");
+    let active = true;
+
+    const timer = setTimeout(async () => {
+      try {
+        const available = await isUsernameAvailable(trimmed);
+        if (!active) return;
+        if (available) {
+          setUsernameStatus("available");
+          setUsernameError("");
+        } else {
+          setUsernameStatus("taken");
+          setUsernameError(`'${trimmed}' is not available`);
+        }
+      } catch (err) {
+        if (!active) return;
+        console.warn("Username availability check error:", err);
+        setUsernameStatus("idle");
+      }
+    }, 280);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [username]);
 
   const cards = [
     { k: "customer" as const, t: "Non Professional", s: "Book local services, get help from verified professionals.", Icon: User },
@@ -84,6 +123,11 @@ export function RolePage() {
       return;
     }
 
+    if (usernameStatus === "taken" || usernameStatus === "invalid") {
+      toast.error(`'${trimmedUsername}' is not available. Please choose another username.`);
+      return;
+    }
+
     if (!age) {
       toast.error("Please select your age.");
       return;
@@ -98,6 +142,16 @@ export function RolePage() {
     setLoading(true);
 
     try {
+      // Final confirmation check to avoid race conditions
+      const available = await isUsernameAvailable(trimmedUsername);
+      if (!available) {
+        setUsernameStatus("taken");
+        setUsernameError(`'${trimmedUsername}' is not available`);
+        toast.error(`'${trimmedUsername}' is not available.`);
+        setLoading(false);
+        return;
+      }
+
       if (pendingSignup?.email && pendingSignup?.password) {
         // Complete email & password registration with all details saved in Firestore
         const user = await signUpWithEmail({
@@ -105,10 +159,22 @@ export function RolePage() {
           password: pendingSignup.password,
           username: usernameCheck.sanitized!,
           displayName: pendingSignup.fullName || usernameCheck.sanitized!,
-          phone: pendingSignup.phone || undefined,
           age,
           gender,
           role: targetRole,
+        });
+
+        clearPendingSignup();
+        toast.success("Account created successfully!");
+        navigate({ to: user.role === "provider" ? "/pro" : "/" });
+      } else if (auth.currentUser) {
+        // User already authenticated with Google (or another provider)
+        const user = await completeUserProfile(auth.currentUser, {
+          role: targetRole,
+          username: usernameCheck.sanitized!,
+          displayName: auth.currentUser.displayName || usernameCheck.sanitized!,
+          age,
+          gender,
         });
 
         clearPendingSignup();
@@ -137,6 +203,7 @@ export function RolePage() {
   };
 
   const sel = "min-w-0 flex-1 appearance-none bg-transparent text-[15px] outline-none";
+  const isUsernameBad = usernameStatus === "taken" || usernameStatus === "invalid";
 
   return (
     <div className="relative mx-auto min-h-[100dvh] max-w-md overflow-hidden bg-gradient-to-b from-mint via-mint-soft to-mint px-5 pb-10 text-mint-ink">
@@ -181,15 +248,52 @@ export function RolePage() {
           <h2 className="text-2xl font-extrabold">Create Your Account</h2>
           <p className="mt-1 text-mint-ink/60">Choose a username and add a few details to get started.</p>
           <div className="mt-6 space-y-4">
-            <Row icon={<User size={22} />}>
-              <input
-                required
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className={`${sel} placeholder:text-mint-ink/50`}
-              />
-            </Row>
+            {/* Live-checked Username field */}
+            <div>
+              <div
+                className={`relative flex h-14 items-center gap-4 rounded-2xl px-5 shadow-md transition ${
+                  isUsernameBad
+                    ? "border-2 border-red-500 bg-red-50/70 shadow-red-500/10 focus-within:ring-2 focus-within:ring-red-400/40"
+                    : usernameStatus === "available"
+                    ? "border-2 border-emerald-500/50 bg-sheet/80 shadow-mint-deep/5 focus-within:ring-2 focus-within:ring-emerald-400/30"
+                    : "border border-transparent bg-sheet/80 shadow-mint-deep/5 focus-within:ring-2 focus-within:ring-mint-deep/30"
+                }`}
+              >
+                <span className={isUsernameBad ? "text-red-500" : "text-mint-deep"}>
+                  <User size={22} />
+                </span>
+                <span className={`h-7 w-px ${isUsernameBad ? "bg-red-300" : "bg-mint-deep/15"}`} />
+                <input
+                  required
+                  placeholder="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className={`${sel} ${isUsernameBad ? "text-red-700" : ""} placeholder:text-mint-ink/50`}
+                />
+                {usernameStatus === "checking" && (
+                  <Loader2 size={18} className="animate-spin text-mint-deep/60 shrink-0" />
+                )}
+                {usernameStatus === "available" && (
+                  <span className="shrink-0 text-emerald-500 animate-in zoom-in-50 duration-200" title="Username is available">
+                    <Check size={20} strokeWidth={2.8} />
+                  </span>
+                )}
+                {isUsernameBad && (
+                  <span
+                    className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-red-500 text-[11px] font-black leading-none text-white shadow-sm shadow-red-500/30 animate-in zoom-in-50 duration-200"
+                    title="Username is not available"
+                  >
+                    !
+                  </span>
+                )}
+              </div>
+              {isUsernameBad && (
+                <p className="mt-1.5 px-2 text-xs font-medium text-red-500 animate-in fade-in slide-in-from-top-1">
+                  {usernameError || `'${username.trim()}' is not available`}
+                </p>
+              )}
+            </div>
+
             <Row icon={<Calendar size={22} />} chevron>
               <select required value={age} onChange={(e) => setAge(e.target.value)} className={`${sel} ${age ? "" : "text-mint-ink/50"}`}>
                 <option value="" disabled>Age</option>
@@ -207,7 +311,7 @@ export function RolePage() {
           </div>
           <button
             type="submit"
-            disabled={!role || loading}
+            disabled={!role || loading || isUsernameBad}
             className="mt-7 h-14 w-full rounded-2xl bg-gradient-to-b from-mint-deep to-primary text-lg font-bold text-primary-foreground shadow-lg shadow-mint-deep/30 transition active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
           >
             {loading ? "Creating account..." : role ? "Continue" : "Select a role to continue"}

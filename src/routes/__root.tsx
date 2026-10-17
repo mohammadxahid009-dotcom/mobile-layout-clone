@@ -169,20 +169,21 @@ function GlobalAuthGate() {
   }, []);
 
   const isAuthRoute = location === "/welcome" || location === "/role";
+  const isFullyOnboarded = Boolean(currentUser && currentUser.username);
 
-  // If unauthenticated and on a protected screen, redirect router to /welcome
+  // If unauthenticated or incomplete and on a protected screen, redirect router to /welcome
   useEffect(() => {
-    if (ready && !currentUser && !isAuthRoute) {
+    if (ready && !isFullyOnboarded && !isAuthRoute) {
       router.navigate({ to: "/welcome" });
     }
-  }, [ready, currentUser, isAuthRoute, router]);
+  }, [ready, isFullyOnboarded, isAuthRoute, router]);
 
-  // If user is authenticated:
-  if (currentUser) {
+  // If user is fully authenticated & onboarded:
+  if (isFullyOnboarded) {
     // If authenticated user navigates to /welcome or /role, redirect them to their home
     if (isAuthRoute) {
       if (typeof window !== "undefined") {
-        router.navigate({ to: currentUser.role === "provider" ? "/pro" : "/" });
+        router.navigate({ to: currentUser!.role === "provider" ? "/pro" : "/" });
       }
       return null;
     }
@@ -191,7 +192,7 @@ function GlobalAuthGate() {
 
   // During SSR or before mount: if stored user is present, render outlet
   if (!ready) {
-    if (currentUser) {
+    if (isFullyOnboarded) {
       return <Outlet />;
     }
     if (isAuthRoute) {
@@ -201,8 +202,7 @@ function GlobalAuthGate() {
     return <Welcome />;
   }
 
-  // If unauthenticated:
-  // Allow public auth onboarding routes (/welcome, /role)
+  // If unauthenticated or completing onboarding (/welcome, /role)
   if (isAuthRoute) {
     return <Outlet />;
   }
