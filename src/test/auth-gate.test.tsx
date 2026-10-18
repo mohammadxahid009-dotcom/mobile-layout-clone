@@ -67,3 +67,11 @@ describe("Authentication & GlobalAuthGate session handling", () => {
     expect(eventDetail).toBeNull();
   });
 });
+
+describe("Welcome component mounting safety", () => {
+  it("can be imported and referenced without crashing", async () => {
+    const welcomeMod = await import("@/routes/welcome");
+    expect(typeof welcomeMod.Welcome).toBe("function");
+    expect(typeof welcomeMod.Route).toBe("object");
+  });
+});

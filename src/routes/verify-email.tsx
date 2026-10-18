@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import { Mail, Loader2 } from "lucide-react";
 import {
@@ -16,7 +16,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/verify-email")({
   validateSearch: (search: Record<string, unknown>) => ({
-    email: typeof search.email === "string" ? search.email : "",
+    email: typeof search.email === "string" ? search.email : undefined,
   }),
   head: () => ({
     meta: [
@@ -109,7 +109,7 @@ function EnvelopeIllustration() {
 
 export function VerifyEmailPage() {
   const navigate = useNavigate();
-  const search = Route.useSearch();
+  const search = useRouterState({ select: (s) => (s.location.search as Record<string, any>) }) || {};
   const [resending, setResending] = useState(false);
   const [cooldown, setCooldown] = useState(() => {
     if (typeof window === "undefined") return RESEND_COOLDOWN_SECONDS;

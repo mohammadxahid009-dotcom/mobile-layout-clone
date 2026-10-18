@@ -15,6 +15,7 @@ import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as ProRouteImport } from './routes/pro'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RoleRouteImport } from './routes/role'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as BookIdRouteImport } from './routes/book.$id'
 import { Route as ChatIdRouteImport } from './routes/chat.$id'
@@ -60,6 +61,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const RoleRoute = RoleRouteImport.update({
   id: '/role',
   path: '/role',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WelcomeRoute = WelcomeRouteImport.update({
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/pro': typeof ProRouteWithChildren
   '/profile': typeof ProfileRoute
   '/role': typeof RoleRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/welcome': typeof WelcomeRoute
   '/book/$id': typeof BookIdRoute
   '/chat/$id': typeof ChatIdRoute
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   '/messages': typeof MessagesRoute
   '/profile': typeof ProfileRoute
   '/role': typeof RoleRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/welcome': typeof WelcomeRoute
   '/book/$id': typeof BookIdRoute
   '/chat/$id': typeof ChatIdRoute
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   '/pro': typeof ProRouteWithChildren
   '/profile': typeof ProfileRoute
   '/role': typeof RoleRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/welcome': typeof WelcomeRoute
   '/book/$id': typeof BookIdRoute
   '/chat/$id': typeof ChatIdRoute
@@ -224,6 +233,7 @@ export interface FileRouteTypes {
     | '/pro'
     | '/profile'
     | '/role'
+    | '/verify-email'
     | '/welcome'
     | '/book/$id'
     | '/chat/$id'
@@ -247,6 +257,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/profile'
     | '/role'
+    | '/verify-email'
     | '/welcome'
     | '/book/$id'
     | '/chat/$id'
@@ -271,6 +282,7 @@ export interface FileRouteTypes {
     | '/pro'
     | '/profile'
     | '/role'
+    | '/verify-email'
     | '/welcome'
     | '/book/$id'
     | '/chat/$id'
@@ -296,6 +308,7 @@ export interface RootRouteChildren {
   ProRoute: typeof ProRouteWithChildren
   ProfileRoute: typeof ProfileRoute
   RoleRoute: typeof RoleRoute
+  VerifyEmailRoute: typeof VerifyEmailRoute
   WelcomeRoute: typeof WelcomeRoute
   BookIdRoute: typeof BookIdRoute
   ChatIdRoute: typeof ChatIdRoute
@@ -345,6 +358,13 @@ declare module '@tanstack/react-router' {
       path: '/role'
       fullPath: '/role'
       preLoaderRoute: typeof RoleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/welcome': {
@@ -499,6 +519,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProRoute: ProRouteWithChildren,
   ProfileRoute: ProfileRoute,
   RoleRoute: RoleRoute,
+  VerifyEmailRoute: VerifyEmailRoute,
   WelcomeRoute: WelcomeRoute,
   BookIdRoute: BookIdRoute,
   ChatIdRoute: ChatIdRoute,

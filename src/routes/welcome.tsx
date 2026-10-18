@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState, useEffect, type ReactNode } from "react";
 import { User, UserPlus, Lock, Mail, Eye, EyeOff, ChevronRight, Leaf } from "lucide-react";
 import { initiateGoogleAuth, signInWithEmail, sendPasswordReset } from "@/lib/firebase";
@@ -99,7 +99,7 @@ function Social({ onGoogleClick }: { onGoogleClick?: () => void }) {
 
 export function Welcome() {
   const navigate = useNavigate();
-  const search = Route.useSearch();
+  const search = useRouterState({ select: (s) => (s.location.search as Record<string, any>) }) || {};
   const [sheet, setSheet] = useState<Sheet>(() => search.sheet || null);
   const [shown, setShown] = useState<Exclude<Sheet, null>>(() => search.sheet || "login");
 
