@@ -168,7 +168,7 @@ function GlobalAuthGate() {
     };
   }, []);
 
-  const isAuthRoute = location === "/welcome" || location === "/role";
+  const isAuthRoute = location === "/welcome" || location === "/role" || location === "/verify-email";
   const isFullyOnboarded = Boolean(currentUser && currentUser.username);
 
   // If unauthenticated or incomplete and on a protected screen, redirect router to /welcome

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { User, UserPlus, Lock, Mail, Eye, EyeOff, ChevronRight, Leaf } from "lucide-react";
 import { initiateGoogleAuth, signInWithEmail, sendPasswordReset } from "@/lib/firebase";
 import { formatFirebaseAuthError, validateEmail, validatePassword, sanitizeText } from "@/lib/auth-validation";
@@ -7,6 +7,9 @@ import { setPendingSignup } from "@/lib/pending-signup";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/welcome")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    sheet: (search.sheet as "login" | "signup" | undefined) || undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Welcome | Budgam Services" },
@@ -96,8 +99,16 @@ function Social({ onGoogleClick }: { onGoogleClick?: () => void }) {
 
 export function Welcome() {
   const navigate = useNavigate();
-  const [sheet, setSheet] = useState<Sheet>(null);
-  const [shown, setShown] = useState<Exclude<Sheet, null>>("login");
+  const search = Route.useSearch();
+  const [sheet, setSheet] = useState<Sheet>(() => search.sheet || null);
+  const [shown, setShown] = useState<Exclude<Sheet, null>>(() => search.sheet || "login");
+
+  useEffect(() => {
+    if (search.sheet) {
+      setSheet(search.sheet);
+      setShown(search.sheet);
+    }
+  }, [search.sheet]);
   const [showLoginPw, setShowLoginPw] = useState(false);
   const [showSignupPw, setShowSignupPw] = useState(false);
   const [showSignupConfirmPw, setShowSignupConfirmPw] = useState(false);
@@ -158,9 +169,17 @@ export function Welcome() {
 
     setLoading(true);
     try {
-      const user = await signInWithEmail(emailTrimmed, loginPassword);
+      const res = await signInWithEmail(emailTrimmed, loginPassword);
+      if (!res.emailVerified) {
+        toast.info("Please verify your email before logging in.");
+        navigate({
+          to: "/verify-email",
+          search: { email: res.email || emailTrimmed },
+        });
+        return;
+      }
       toast.success("Welcome back!");
-      navigate({ to: user.role === "provider" ? "/pro" : "/" });
+      navigate({ to: res.user!.role === "provider" ? "/pro" : "/" });
     } catch (err: any) {
       toast.error(formatFirebaseAuthError(err));
     } finally {

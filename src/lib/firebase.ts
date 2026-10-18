@@ -8,6 +8,7 @@ import {
   updateProfile,
   signOut,
   sendPasswordResetEmail,
+  sendEmailVerification,
   onAuthStateChanged,
   type Auth,
   type User as FirebaseUser,
@@ -80,6 +81,7 @@ export interface StoredAuthUser {
   phone?: string;
   age?: string | number;
   gender?: string;
+  emailVerified?: boolean;
 }
 
 export const AUTH_STORAGE_KEY = "budgam_auth_user";
@@ -270,9 +272,40 @@ export async function fetchUserFromFirestore(uid: string): Promise<Record<string
 }
 
 /**
+ * Send an email verification link to a user.
+ */
+export async function sendUserEmailVerification(targetUser?: FirebaseUser | null): Promise<void> {
+  const userToSend = targetUser || auth.currentUser;
+  if (!userToSend) {
+    throw new Error("No authenticated user available to send verification email.");
+  }
+  await sendEmailVerification(userToSend);
+}
+
+/**
+ * Check whether the current Firebase user's email has been verified.
+ */
+export async function checkCurrentUserEmailVerified(): Promise<boolean> {
+  if (!auth.currentUser) return false;
+  try {
+    await auth.currentUser.reload();
+    return auth.currentUser.emailVerified;
+  } catch {
+    return false;
+  }
+}
+
+export interface SignInResult {
+  emailVerified: boolean;
+  email?: string | null;
+  user?: StoredAuthUser;
+}
+
+/**
  * Sign Up with Email and Password.
- * Validates credentials, creates Firebase Auth account, stores profile in Firestore,
- * reserves username index, updates Auth display name, and initiates persistent session.
+ * Creates Firebase Auth account, sends verification email, reserves username,
+ * stores full profile details in Firestore under /users/{uid}.
+ * Note: Session is NOT activated yet because email verification is required.
  */
 export async function signUpWithEmail(params: {
   email: string;
@@ -283,7 +316,7 @@ export async function signUpWithEmail(params: {
   phone?: string;
   age?: string | number;
   gender?: string;
-}): Promise<StoredAuthUser> {
+}): Promise<{ user: StoredAuthUser; emailVerified: boolean }> {
   // Validate and sanitize inputs strictly
   const emailVal = validateEmail(params.email);
   if (!emailVal.valid) throw new Error(emailVal.error);
@@ -321,14 +354,25 @@ export async function signUpWithEmail(params: {
   await reserveUsername(cleanUsername, fbUser.uid);
 
   // Persist all user details into Firestore database under /users/{uid}
-  await syncUserToFirestore(fbUser, {
-    role: cleanRole,
-    displayName: params.displayName ? sanitizeText(params.displayName) : cleanUsername,
-    username: cleanUsername,
-    phone: cleanPhone,
-    age: cleanAge,
-    gender: cleanGender,
-  }, true);
+  await syncUserToFirestore(
+    fbUser,
+    {
+      role: cleanRole,
+      displayName: params.displayName ? sanitizeText(params.displayName) : cleanUsername,
+      username: cleanUsername,
+      phone: cleanPhone,
+      age: cleanAge,
+      gender: cleanGender,
+    },
+    true
+  );
+
+  // Send verification email
+  try {
+    await sendEmailVerification(fbUser);
+  } catch (err) {
+    console.warn("Initial sendEmailVerification notice:", err);
+  }
 
   const storedUser: StoredAuthUser = {
     uid: fbUser.uid,
@@ -341,22 +385,25 @@ export async function signUpWithEmail(params: {
     phone: cleanPhone,
     age: cleanAge,
     gender: cleanGender,
+    emailVerified: false,
   };
 
-  saveStoredUser(storedUser);
-  notifyAuthListeners(storedUser);
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent("budgam_auth_change", { detail: storedUser }));
-  }
+  // Do NOT persist active session to storage yet: user must verify email first
+  saveStoredUser(null);
+  notifyAuthListeners(null);
 
-  return storedUser;
+  return { user: storedUser, emailVerified: false };
 }
 
 /**
  * Sign In with Email and Password.
- * Resolves user profile and role from Firestore, then sets active persistent session.
+ * Enforces email verification: if unverified, returns emailVerified: false without activating session.
+ * If verified, loads profile and role from Firestore, then sets active persistent session.
  */
-export async function signInWithEmail(emailInput: string, passwordInput: string): Promise<StoredAuthUser> {
+export async function signInWithEmail(
+  emailInput: string,
+  passwordInput: string
+): Promise<SignInResult> {
   const emailVal = validateEmail(emailInput);
   if (!emailVal.valid) throw new Error(emailVal.error);
 
@@ -365,6 +412,23 @@ export async function signInWithEmail(emailInput: string, passwordInput: string)
 
   const cred = await signInWithEmailAndPassword(auth, emailVal.sanitized!, passwordInput);
   const fbUser = cred.user;
+
+  // Reload user state to obtain latest emailVerified value
+  try {
+    await fbUser.reload();
+  } catch {
+    // continue with current snapshot
+  }
+
+  // Verification check: email/password accounts must be verified before login
+  if (!fbUser.emailVerified) {
+    saveStoredUser(null);
+    notifyAuthListeners(null);
+    return {
+      emailVerified: false,
+      email: fbUser.email,
+    };
+  }
 
   // Read saved profile and role from Firestore
   let resolvedRole: AppUserRole = "customer";
@@ -399,6 +463,7 @@ export async function signInWithEmail(emailInput: string, passwordInput: string)
     phone: resolvedPhone,
     age: resolvedAge,
     gender: resolvedGender,
+    emailVerified: true,
   };
 
   if (resolvedUsername) {
@@ -419,7 +484,11 @@ export async function signInWithEmail(emailInput: string, passwordInput: string)
     gender: resolvedGender,
   }).catch(() => {});
 
-  return storedUser;
+  return {
+    emailVerified: true,
+    user: storedUser,
+    email: fbUser.email,
+  };
 }
 
 /**
@@ -477,6 +546,7 @@ export async function completeUserProfile(
     phone: cleanPhone,
     age: cleanAge,
     gender: cleanGender,
+    emailVerified: fbUser.emailVerified ?? true,
   };
 
   saveStoredUser(storedUser);
@@ -518,6 +588,7 @@ export async function initiateGoogleAuth(): Promise<{
       phone: profile!.phone,
       age: profile!.age,
       gender: profile!.gender,
+      emailVerified: true,
     };
     saveStoredUser(storedUser);
     notifyAuthListeners(storedUser);
@@ -536,6 +607,7 @@ export async function initiateGoogleAuth(): Promise<{
     role: "customer",
     providerId: "google.com",
     username: undefined,
+    emailVerified: true,
   };
 
   return { isNewUser: true, user: tempUser };
@@ -605,6 +677,7 @@ export async function signInWithGoogle(
     phone: resolvedPhone,
     age: resolvedAge,
     gender: resolvedGender,
+    emailVerified: true,
   };
 
   if (resolvedUsername) {
@@ -663,6 +736,12 @@ export function initAuthListener(onUserChange: (user: StoredAuthUser | null) => 
 
   const unsubFb = onAuthStateChanged(auth, async (fbUser) => {
     if (fbUser) {
+      // If user is email/password provider and unverified, do not populate session
+      const isPasswordUser = fbUser.providerData.some((p) => p.providerId === "password");
+      if (isPasswordUser && !fbUser.emailVerified) {
+        return;
+      }
+
       const existing = getStoredUser();
       let username = existing?.username;
       let role: AppUserRole = existing?.role || "customer";
@@ -704,6 +783,7 @@ export function initAuthListener(onUserChange: (user: StoredAuthUser | null) => 
         phone,
         age,
         gender,
+        emailVerified: fbUser.emailVerified ?? true,
       };
       saveStoredUser(updated);
       onUserChange(updated);

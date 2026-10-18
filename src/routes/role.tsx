@@ -154,8 +154,9 @@ export function RolePage() {
 
       if (pendingSignup?.email && pendingSignup?.password) {
         // Complete email & password registration with all details saved in Firestore
-        const user = await signUpWithEmail({
-          email: pendingSignup.email,
+        const registeredEmail = pendingSignup.email;
+        await signUpWithEmail({
+          email: registeredEmail,
           password: pendingSignup.password,
           username: usernameCheck.sanitized!,
           displayName: pendingSignup.fullName || usernameCheck.sanitized!,
@@ -165,8 +166,11 @@ export function RolePage() {
         });
 
         clearPendingSignup();
-        toast.success("Account created successfully!");
-        navigate({ to: user.role === "provider" ? "/pro" : "/" });
+        toast.success("Account created! Please check your email to verify your account.");
+        navigate({
+          to: "/verify-email",
+          search: { email: registeredEmail },
+        });
       } else if (auth.currentUser) {
         // User already authenticated with Google (or another provider)
         const user = await completeUserProfile(auth.currentUser, {
